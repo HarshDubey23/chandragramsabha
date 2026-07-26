@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Activity, ChevronRight, Clock, Hash, Inbox, Lock, Server } from 'lucide-react'
+import { Activity, ChevronRight, Clock, Hash, Inbox, Lock, Server, Download, Loader2 } from 'lucide-react'
 import { actionBadgeClass, actionLabel, entityTypeLabel, formatDateTime } from './lib'
 import type { Locale } from '@/lib/i18n'
 
@@ -36,6 +36,7 @@ export function ActivityLog() {
   const [logs, setLogs] = useState<LogEntry[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<LogEntry | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/activity?limit=100')
@@ -44,6 +45,28 @@ export function ActivityLog() {
       .catch(() => { setLogs([]); toast.error(locale === 'hi' ? 'लॉग लोड विफल' : 'Activity log load failed') })
       .finally(() => setLoading(false))
   }, [locale])
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const r = await fetch('/api/admin/activity/export')
+      if (!r.ok) throw new Error('export_failed')
+      const blob = await r.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `activity-log-${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success(locale === 'hi' ? 'CSV डाउनलोड हुआ' : 'CSV downloaded')
+    } catch (e) {
+      toast.error(locale === 'hi' ? 'निर्यात विफल' : 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -59,12 +82,24 @@ export function ActivityLog() {
               : 'Immutable audit trail (read-only).'}
           </p>
         </div>
-        {logs && (
-          <Badge variant="outline" className="text-[10px] gap-1">
-            <Activity className="h-3 w-3" />
-            {locale === 'hi' ? `${logs.length} प्रविष्टियाँ` : `${logs.length} entries`}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {logs && (
+            <Badge variant="outline" className="text-[10px] gap-1">
+              <Activity className="h-3 w-3" />
+              {locale === 'hi' ? `${logs.length} प्रविष्टियाँ` : `${logs.length} entries`}
+            </Badge>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs gap-1.5 border-primary/30 hover:border-primary/50"
+            onClick={handleExport}
+            disabled={exporting || !logs || logs.length === 0}
+          >
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            {locale === 'hi' ? 'CSV निर्यात' : 'Export CSV'}
+          </Button>
+        </div>
       </div>
 
       <Card>

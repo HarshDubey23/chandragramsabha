@@ -278,6 +278,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
   const { locale } = useI18n()
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<Complaint[] | null>(null)
+  const [feedbackStats, setFeedbackStats] = useState<{ total: number; average: number; distribution: { rating: number; count: number }[] } | null>(null)
   const [loading, setLoading] = useState(true)
 
   // System status checks
@@ -289,11 +290,13 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
     Promise.all([
       fetch('/api/stats').then(r => r.json()),
       fetch('/api/complaints/list').then(r => r.json()),
+      fetch('/api/feedback/stats').then(r => r.ok ? r.json() : null).catch(() => null),
     ])
-      .then(([s, c]) => {
+      .then(([s, c, f]) => {
         if (!alive) return
         setStats(s)
         setRecent((c.complaints || []).slice(0, 5))
+        if (f) setFeedbackStats(f)
       })
       .catch(() => {
         if (!alive) return
@@ -842,6 +845,46 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
                   )
                 })}
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Citizen Feedback Rating Distribution ──────────────────────────── */}
+      {feedbackStats && feedbackStats.total > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" />
+              {locale === 'hi' ? 'नागरिक प्रतिक्रिया रेटिंग' : 'Citizen Feedback Ratings'}
+              <Badge variant="outline" className="text-[9px] ml-auto gap-1">
+                <Star className="h-2.5 w-2.5" />
+                {feedbackStats.average.toFixed(1)} / 5
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={feedbackStats.distribution.map(d => ({ name: `${d.rating}★`, rating: d.rating, count: d.count }))}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <Tooltip
+                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}
+                  formatter={(val: number) => [`${val} ${locale === 'hi' ? 'प्रतिक्रियाएँ' : 'feedback'}`, locale === 'hi' ? 'गणना' : 'Count']}
+                />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {feedbackStats.distribution.map((d) => {
+                    // Color gradient: red (1★) → green (5★)
+                    const colors = ['oklch(0.58 0.22 27)', 'oklch(0.65 0.18 45)', 'oklch(0.72 0.15 65)', 'oklch(0.68 0.14 130)', 'oklch(0.60 0.14 145)']
+                    return <Cell key={d.rating} fill={colors[d.rating - 1]} />
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+              <span>{locale === 'hi' ? `कुल ${feedbackStats.total} प्रतिक्रियाएँ` : `${feedbackStats.total} total feedback`}</span>
+              <span>{locale === 'hi' ? `औसत: ${feedbackStats.average.toFixed(2)} / 5` : `Average: ${feedbackStats.average.toFixed(2)} / 5`}</span>
             </div>
           </CardContent>
         </Card>

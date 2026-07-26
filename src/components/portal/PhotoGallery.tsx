@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { ScrollReveal } from './ScrollReveal'
 import { ImageLightbox } from './ImageLightbox'
+import { BlurImage } from './BlurImage'
 
 /* ──────────────────────────────────────────────────────────────────────
    Photo Gallery — Gram Panchayat Chandra
@@ -333,14 +334,14 @@ export function PhotoGallery() {
                   className="group relative overflow-hidden rounded-lg border border-border/60 bg-secondary/40 card-hover-lift text-left focus-ring block w-full"
                   aria-label={isHi ? `तस्वीर देखें: ${img.hiCaption}` : `View image: ${img.enCaption}`}
                 >
-                  {/* Image */}
-                  <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-                    <img
-                      src={img.url}
-                      alt={caption}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                  {/* Image with blur-up placeholder */}
+                  <BlurImage
+                    src={img.url}
+                    alt={caption}
+                    loading="lazy"
+                    aspectClassName="aspect-[4/3]"
+                    containerClassName="group-hover:scale-105 transition-transform duration-500"
+                  />
                     {/* Top-left category badge */}
                     <span
                       className={`absolute top-2 left-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm ${badgeStyle}`}
@@ -362,7 +363,6 @@ export function PhotoGallery() {
                         </div>
                       )}
                     </div>
-                  </div>
                 </motion.button>
               )
             })}

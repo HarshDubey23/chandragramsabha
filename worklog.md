@@ -413,3 +413,54 @@ Task: Delete original JPGs, structured array form editors, fix 404s
 3. PWA offline fallback page (cached HTML when fully offline).
 4. Admin activity log export (CSV/PDF) for audit compliance.
 5. Citizen feedback rating distribution chart in admin dashboard.
+
+---
+Task ID: 18
+Agent: webDevReview cron (round 8)
+Task: PhotoGallery blur-up, activity log CSV export, feedback rating chart
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos (WebP) + 3 videos, admin panel with 13 tabs (full RBAC), dynamic content system with 7 structured form editors, citizen complaint form, blog/CMS, global search, marketplace, PWA install prompt. Production-stable.
+
+## Work Completed This Round
+
+### PhotoGallery Blur-Up Lazy Loading (performance enhancement)
+- Created `BlurImage` reusable component: shows a shimmer placeholder while the image loads, then fades in the image with a blur-to-clear transition (700ms duration). Uses `onLoad` event to detect when image is ready.
+- Added shimmer animation CSS to globals.css: `@keyframes shimmer-slide` with saffron/cream gradient for light mode and dark variant for dark mode.
+- Updated PhotoGallery to use `BlurImage` instead of plain `<img>` for all 88 gallery images.
+- Impact: perceived performance improvement — users see an animated shimmer instead of a blank box while images load, especially on slow rural mobile networks.
+
+### Admin Activity Log CSV Export (audit compliance)
+- Created `/api/admin/activity/export` route — admin-only (requireRole 'admin'), returns up to 1000 log entries as a downloadable CSV file with proper escaping (commas, quotes, newlines).
+- CSV columns: Date, Admin, Email, Action, Entity Type, Entity ID, IP, Before, After.
+- Added "CSV निर्यात / Export CSV" button to ActivityLog admin component with loading state.
+- Tested: export API returns HTTP 200 with correct CSV content-type and Content-Disposition header.
+- Impact: admin can now export the full audit trail for government compliance records.
+
+### Citizen Feedback Rating Distribution Chart
+- Created `/api/feedback/stats` endpoint: returns total count, average rating, and distribution by rating (1-5 stars) using Prisma groupBy. Viewer+ role required.
+- Seeded 7 feedback entries (ratings 1-5) for demo complaints to populate the chart.
+- Added feedback rating distribution BarChart to admin Dashboard: 5 bars colored from red (1★) to green (5★), average rating badge, total count, bilingual labels. Uses Recharts BarChart with custom tooltip.
+- Fetches in parallel with stats + complaints in the Dashboard useEffect.
+- Verified: API returns {total:7, avg:4.0, dist:[1★:0, 2★:1, 3★:1, 4★:2, 5★:3]}.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings, 0 404s.
+- 200 images loading (0 broken) — all WebP with blur-up placeholder.
+- PhotoGallery: shimmer placeholder visible during image load, smooth fade-in transition.
+- Activity log CSV export: API returns HTTP 200, CSV file downloads correctly.
+- Feedback rating chart: renders on dashboard with 5 bars + average badge (4.0/5).
+- Feedback stats API: returns correct distribution data (7 entries, avg 4.0).
+
+## Unresolved Issues / Risks
+- BlogManager still uses execCommand (deprecated but functional) — TipTap upgrade is future work.
+- PWA offline fallback page still pending (cached HTML when fully offline).
+- Agent-browser screenshot doesn't always capture chart elements below the fold — testing limitation only.
+
+## Priority Recommendations for Next Phase
+1. Replace execCommand blog editor with TipTap for robustness.
+2. PWA offline fallback page (cached HTML when fully offline).
+3. Add more interactive data visualizations (complaint trend over time, scheme enrollment growth).
+4. Add citizen notification system (email/SMS when complaint status changes).
+5. Add multi-ward comparative analytics dashboard.
