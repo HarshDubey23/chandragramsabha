@@ -26,6 +26,7 @@ model User {
 
   activityLogs AdminActivityLog[]
   complaintsAssigned Complaint[] @relation("AssignedComplaints")
+  posts Post[] @relation("PostAuthor")
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -277,4 +278,28 @@ model MarketplaceItem {
   @@index([category])
   @@index([status])
   @@index([isApproved])
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Blog / CMS Posts (master doc §4.2) — admin-published articles
+// ────────────────────────────────────────────────────────────────────────────
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String   // HTML content from rich text editor
+  coverImage  String?
+  category    String   @default("news") // announcement | scheme | news | meeting | notice
+  status      String   @default("draft") // draft | published | archived
+  tags        String   @default("[]")   // JSON array of tag strings
+  authorId    String?
+  author      User?    @relation("PostAuthor", fields: [authorId], references: [id])
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
 }

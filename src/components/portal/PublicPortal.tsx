@@ -29,6 +29,7 @@ import { VideoGallery } from './VideoGallery'
 import { VillageTimeline } from './VillageTimeline'
 import { Announcements } from './Announcements'
 import { CitizenServiceTracker } from './CitizenServiceTracker'
+import { BlogSection } from './BlogSection'
 
 export function PublicPortal() {
   return (
@@ -74,6 +75,7 @@ export function PublicPortal() {
       <VideoGallery />
       <VillageTimeline />
       <Announcements />
+      <BlogSection />
     </>
   )
 }

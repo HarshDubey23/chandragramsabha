@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Phone, Mic, ArrowLeft, Clock, CheckCircle2, AlertCircle, XCircle, Loader2 } from 'lucide-react'
+import { Search, Phone, Mic, ArrowLeft, Clock, CheckCircle2, AlertCircle, XCircle, Loader2, Send, FileText, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CitizenFeedback } from './CitizenFeedback'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ComplaintResponse {
   trackingId: string
@@ -47,8 +49,47 @@ export function ComplaintTracking() {
   const [result, setResult] = useState<ComplaintResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleTrack = async () => {
-    const id = trackingId.trim().toUpperCase()
+  // ── Web complaint form state ──
+  const [showForm, setShowForm] = useState(false)
+  const [formName, setFormName] = useState('')
+  const [formPhone, setFormPhone] = useState('')
+  const [formCategory, setFormCategory] = useState('other')
+  const [formReason, setFormReason] = useState('')
+  const [formSubmitting, setFormSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [formSuccess, setFormSuccess] = useState<string | null>(null)
+
+  const resetForm = () => {
+    setFormName(''); setFormPhone(''); setFormCategory('other'); setFormReason('')
+    setFormError(null); setFormSuccess(null)
+  }
+
+  const handleSubmitComplaint = async () => {
+    setFormError(null)
+    setFormSuccess(null)
+    if (!formName.trim()) { setFormError(locale === 'hi' ? 'कृपया नाम दर्ज करें' : 'Please enter your name'); return }
+    if (formPhone.replace(/[^\d]/g, '').length < 10) { setFormError(locale === 'hi' ? 'कृपया सही 10-अंकीय फ़ोन नंबर दर्ज करें' : 'Please enter a valid 10-digit phone number'); return }
+    if (formReason.trim().length < 10) { setFormError(locale === 'hi' ? 'कृपया शिकायत विवरण दर्ज करें (कम से कम 10 अक्षर)' : 'Please enter complaint details (min 10 characters)'); return }
+    setFormSubmitting(true)
+    try {
+      const r = await fetch('/api/complaints/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callerName: formName, callerPhone: formPhone, category: formCategory, callReason: formReason }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.message || d.error || 'submit_failed')
+      setFormSuccess(d.trackingId)
+      resetForm()
+    } catch (e) {
+      setFormError((e as Error).message || (locale === 'hi' ? 'शिकायत दर्ज करने में विफल' : 'Failed to submit complaint'))
+    } finally {
+      setFormSubmitting(false)
+    }
+  }
+
+  const handleTrack = async (overrideId?: string) => {
+    const id = (overrideId || trackingId).trim().toUpperCase()
     if (!id) {
       setError(locale === 'hi' ? 'कृपया ट्रैकिंग आईडी दर्ज करें' : 'Please enter a tracking ID')
       return
@@ -220,31 +261,180 @@ export function ComplaintTracking() {
           </Card>
         )}
 
-        {/* New complaint CTA */}
+        {/* New complaint — two options: web form + voice call */}
         {!result && (
-          <Card className="border-accent/40 bg-accent/5 mt-6">
-            <CardContent className="p-5 flex items-center gap-4 flex-wrap">
-              <div className="h-12 w-12 rounded-full bg-accent text-accent-foreground grid place-items-center shrink-0">
-                <Mic className="h-6 w-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm">
-                  {locale === 'hi' ? 'नई शिकायत दर्ज करें' : 'File a New Complaint'}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {locale === 'hi'
-                    ? 'प्रधान जी उपलब्ध नहीं हैं? AI वॉइस सहायक से शिकायत दर्ज करें।'
-                    : 'Pradhan unavailable? File a complaint with the AI voice assistant.'}
-                </p>
-              </div>
-              <Button asChild className="gap-1.5">
-                <a href="tel:+919651035021">
-                  <Phone className="h-4 w-4" />
-                  {locale === 'hi' ? 'कॉल करें' : 'Call'}
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="mt-6 space-y-4">
+            {/* Success banner */}
+            {formSuccess && (
+              <Card className="border-green-500/50 bg-green-500/5 border-2">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-600 text-white grid place-items-center shrink-0">
+                      <CheckCircle className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm text-green-700 dark:text-green-400">
+                        {locale === 'hi' ? 'शिकायत सफलतापूर्वक दर्ज हुई!' : 'Complaint filed successfully!'}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {locale === 'hi' ? 'आपकी ट्रैकिंग आईडी:' : 'Your tracking ID:'}
+                      </p>
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <code className="text-lg font-mono font-bold text-green-700 dark:text-green-400 bg-green-500/10 px-3 py-1 rounded">
+                          {formSuccess}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={() => { const tid = formSuccess; setShowForm(false); setFormSuccess(null); handleTrack(tid) }}
+                        >
+                          <Search className="h-3 w-3" />
+                          {locale === 'hi' ? 'अभी ट्रैक करें' : 'Track now'}
+                        </Button>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-2">
+                        {locale === 'hi' ? 'इस आईडी को सुरक्षित रखें। भविष्य में स्थिति देखने के लिए उपयोग करें।' : 'Save this ID to check status in the future.'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Web form */}
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-5">
+                <div
+                  onClick={() => { setShowForm(s => !s); if (showForm) resetForm() }}
+                  className="w-full flex items-center gap-4 text-left cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setShowForm(s => !s); if (showForm) resetForm() } }}
+                >
+                  <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground grid place-items-center shrink-0 shadow-md">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm">
+                      {locale === 'hi' ? 'ऑनलाइन शिकायत दर्ज करें' : 'File Complaint Online'}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {locale === 'hi'
+                        ? 'फॉर्म भरकर तुरंत शिकायत दर्ज करें। ट्रैकिंग आईडी तुरंत मिलेगी।'
+                        : 'Fill the form to file a complaint instantly. Get a tracking ID immediately.'}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 shrink-0 h-8 px-3 text-xs rounded-md border border-border bg-background text-foreground hover:bg-accent">
+                    {showForm ? (locale === 'hi' ? 'बंद करें' : 'Close') : (locale === 'hi' ? 'खोलें' : 'Open')}
+                  </span>
+                </div>
+
+                {showForm && (
+                  <div className="mt-5 pt-5 border-t border-border/50 space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium">
+                          {locale === 'hi' ? 'नाम *' : 'Name *'}
+                        </label>
+                        <Input
+                          value={formName}
+                          onChange={(e) => setFormName(e.target.value)}
+                          placeholder={locale === 'hi' ? 'अपना पूरा नाम' : 'Your full name'}
+                          className="text-sm"
+                          dir="auto"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium">
+                          {locale === 'hi' ? 'फ़ोन नंबर *' : 'Phone Number *'}
+                        </label>
+                        <Input
+                          value={formPhone}
+                          onChange={(e) => setFormPhone(e.target.value)}
+                          placeholder={locale === 'hi' ? '10-अंकीय मोबाइल नंबर' : '10-digit mobile number'}
+                          className="text-sm font-mono"
+                          inputMode="tel"
+                          maxLength={13}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium">
+                        {locale === 'hi' ? 'श्रेणी' : 'Category'}
+                      </label>
+                      <Select value={formCategory} onValueChange={setFormCategory}>
+                        <SelectTrigger className="text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(CATEGORIES).map(([key, val]) => (
+                            <SelectItem key={key} value={key} className="text-sm">
+                              {locale === 'hi' ? val.hi : val.en} {locale === 'hi' ? `/ ${val.en}` : `/ ${val.hi}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium">
+                        {locale === 'hi' ? 'शिकायत विवरण *' : 'Complaint Details *'}
+                      </label>
+                      <Textarea
+                        value={formReason}
+                        onChange={(e) => setFormReason(e.target.value)}
+                        placeholder={locale === 'hi' ? 'अपनी शिकायत का विस्तृत विवरण लिखें...' : 'Write detailed description of your complaint...'}
+                        className="text-sm min-h-[100px]"
+                        dir="auto"
+                        maxLength={2000}
+                      />
+                      <p className="text-[10px] text-muted-foreground text-right">{formReason.length}/2000</p>
+                    </div>
+                    {formError && (
+                      <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 p-3 rounded-lg border border-destructive/20">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        {formError}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <Button onClick={handleSubmitComplaint} disabled={formSubmitting} className="gap-1.5 glow-saffron">
+                        {formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        {formSubmitting ? (locale === 'hi' ? 'दर्ज हो रहा है...' : 'Submitting...') : (locale === 'hi' ? 'शिकायत दर्ज करें' : 'Submit Complaint')}
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground">
+                        {locale === 'hi' ? 'आपका फ़ोन नंबर DPDP अनुसार सुरक्षित रहेगा' : 'Your phone is protected per DPDP Act'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Voice complaint CTA */}
+            <Card className="border-accent/40 bg-accent/5">
+              <CardContent className="p-5 flex items-center gap-4 flex-wrap">
+                <div className="h-12 w-12 rounded-full bg-accent text-accent-foreground grid place-items-center shrink-0">
+                  <Mic className="h-6 w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm">
+                    {locale === 'hi' ? 'AI वॉइस शिकायत लाइन' : 'AI Voice Complaint Line'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {locale === 'hi'
+                      ? 'प्रधान जी उपलब्ध नहीं हैं? AI वॉइस सहायक से शिकायत दर्ज करें।'
+                      : 'Pradhan unavailable? File a complaint with the AI voice assistant.'}
+                  </p>
+                </div>
+                <Button asChild className="gap-1.5">
+                  <a href="tel:+919651035021">
+                    <Phone className="h-4 w-4" />
+                    {locale === 'hi' ? 'कॉल करें' : 'Call'}
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

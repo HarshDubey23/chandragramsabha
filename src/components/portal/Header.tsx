@@ -5,6 +5,7 @@ import { useUI } from '@/lib/ui-store'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { DarkModeToggle } from './DarkModeToggle'
 import { ExportReport } from './ExportReport'
+import { GlobalSearch } from './GlobalSearch'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -14,7 +15,7 @@ import {
   SheetTitle,
   SheetHeader,
 } from '@/components/ui/sheet'
-import { Menu, Shield, Phone, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store, Video } from 'lucide-react'
+import { Menu, Shield, Phone, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store, Video, Search } from 'lucide-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   DropdownMenu,
@@ -30,11 +31,24 @@ export function Header() {
   const { view, setView, setScrollTarget } = useUI()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Keyboard shortcut: Ctrl+K / Cmd+K to open global search
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   const navItems = [
@@ -168,6 +182,18 @@ export function Header() {
 
           {/* Right actions — more styled */}
           <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 h-9 text-xs shadow-sm hover:shadow-md border-primary/30 hover:border-primary/50 transition-all"
+              onClick={() => setSearchOpen(true)}
+              aria-label={locale === 'hi' ? 'खोजें' : 'Search'}
+              title={locale === 'hi' ? 'खोजें (Ctrl+K)' : 'Search (Ctrl+K)'}
+            >
+              <Search className="h-3.5 w-3.5 text-primary" />
+              <span className="hidden xl:inline">{locale === 'hi' ? 'खोजें' : 'Search'}</span>
+              <kbd className="hidden xl:inline text-[9px] text-muted-foreground border border-border rounded px-1 ml-1">⌘K</kbd>
+            </Button>
             <ExportReport />
             <Button
               variant="outline"
@@ -180,6 +206,7 @@ export function Header() {
             </Button>
             <LanguageSwitcher />
             <DarkModeToggle />
+            <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
             <Button
               variant="default"
               size="sm"

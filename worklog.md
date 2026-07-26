@@ -96,3 +96,56 @@ Stage Summary:
 - All 88 real WhatsApp photos + 3 real WhatsApp videos now displayed. ZERO AI-generated content.
 - Portal is production-ready with 31 sections, bilingual Hindi/English, admin panel with upload capability, real images and videos everywhere.
 - Next priorities: (1) Blog/CMS with TipTap editor (P1 §4.2), (2) Global search (P2 §5.4), (3) Admin RBAC (P2 §5.3), (4) Dynamic content sections (P1 §4.3).
+
+---
+Task ID: 12
+Agent: webDevReview cron (round 2)
+Task: QA, fix hydration bug, add citizen web complaint form, Blog/CMS system, global search
+
+## Current Project Status
+- 31 sections, 88 real WhatsApp photos + 3 videos, admin panel with 10 tabs, scrypt auth, image upload API + UI, SSE notifications. Production-stable.
+
+## Work Completed This Round
+
+### Bug Fixes
+1. **Hydration error (nested buttons)**: ComplaintTracking had a `<button>` inside a `<Button>` — changed outer to `<div role="button">` with keyboard handler. Hydration errors eliminated.
+2. **Nested mini-services dir**: Fixed `mini-services/mini-services/vapi-webhook` → `mini-services/vapi-webhook`.
+
+### New Feature 1: Citizen Web Complaint Form (master doc §9.1)
+- Created `/api/complaints/create` POST endpoint: validates name/phone/reason, generates GPCH- tracking ID, hashes phone per DPDP, rate-limits (5/IP/10min), stores with timeline entry.
+- Added full web form to ComplaintTracking page: collapsible card with name, phone (10-digit), category dropdown (water/road/school/housing/pension/mgnrega/other), complaint textarea (2000 char limit with counter), submit button with loading state, success banner showing tracking ID + "Track now" button, error display, DPDP note.
+- Tested end-to-end: created complaint GPCH-MS14HKAC via API, verified trackable.
+- Voice complaint CTA preserved as second option.
+
+### New Feature 2: Blog/CMS System (master doc §4.2)
+- Added `Post` model to Prisma schema (id, title, slug unique, excerpt, content HTML, coverImage, category, status draft/published/archived, tags JSON, authorId relation, publishedAt, timestamps). Pushed to DB.
+- Created `/api/posts` (GET public published + admin all, POST admin create with auto-slug) and `/api/posts/[slug]` (GET single, PATCH edit, DELETE) with audit logging.
+- Created `BlogManager` admin component: post list with category/status badges, new/edit/delete/publish/unpublish actions, rich text editor (contentEditable + execCommand toolbar: bold/italic/heading/list/quote/link), title/slug/category/coverImage/excerpt/tags fields, save draft + publish buttons. Added as "ब्लॉग" tab in AdminPanel (now 11 tabs).
+- Created `BlogSection` public component: category filter chips (all/announcement/scheme/news/meeting/notice), post cards with cover image or gradient header, category badge, date, author, excerpt, read button, tags. Reader dialog with full HTML content, reading time, cover image. Added to PublicPortal (now 32 sections).
+- Created test post "ग्राम सभा बैठक - 15 अगस्त 2026" via API, verified on public portal.
+
+### New Feature 3: Global Search (master doc §5.4)
+- Created `/api/search` GET endpoint: searches announcements, notices, posts, complaints (by tracking ID/name/reason), marketplace items, and 20 static keyword entries (PMAY, MGNREGA, pension, water, road, school, health, pradhan, up-pradhan, GPA, budget, RTI, polls, marketplace, gallery, videos, blog, ward, timeline, FAQ). Returns ranked, deduped results with type/title/subtitle/href/icon.
+- Created `GlobalSearch` dialog component: debounced search (250ms), keyboard navigation (↑↓ navigate, ↵ select, ESC close), icon per result type, active highlight, suggestion tags when empty, result count, footer with keyboard hints.
+- Integrated into Header: search button with ⌘K hint + Ctrl+K/Cmd+K keyboard shortcut to open. Tested: "pmay" returns 3 results (announcement, complaint, scheme), "मनरेगा" returns results. VLM rated 7/10.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections (was 31 — added BlogSection), 0 hydration errors, 0 console errors.
+- Admin panel: 11 tabs (added ब्लॉग/Blog tab), BlogManager CRUD works.
+- Complaint form: tested via API, creates trackable complaints.
+- Blog: test post created + displayed on public portal.
+- Search: Ctrl+K opens dialog, returns results for queries.
+
+## Unresolved Issues / Risks
+- Marketplace section shows empty state (no approved listings) — needs seed data or admin approval of items.
+- Hero data panel contrast could be improved (VLM noted) — low priority.
+- BlogManager rich text editor uses deprecated `document.execCommand` — works but TipTap would be more robust (future upgrade).
+- Some VLM text misreads in screenshots (e.g., "बैठक" read as "डेक") — UI is correct, just OCR limitations.
+
+## Priority Recommendations for Next Phase
+1. Seed marketplace items + blog posts for richer initial content.
+2. Dynamic content sections (P1 §4.3) — make VillageStats/Infrastructure/Education data admin-editable.
+3. Admin RBAC (P2 §5.3) — 4 roles (SuperAdmin/Editor/DepartmentOfficial/Viewer).
+4. Replace execCommand editor with TipTap for robustness.
+5. Image optimization pipeline (P2 §5.1) — batch convert 88 JPGs to WebP.
