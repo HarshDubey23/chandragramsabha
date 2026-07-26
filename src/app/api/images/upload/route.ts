@@ -5,7 +5,7 @@
 // ImageAsset DB record with category + bilingual captions + public toggle.
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 import sharp from 'sharp'
 import crypto from 'node:crypto'
@@ -13,8 +13,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'secretary')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'संपादक या उच्च अनुमति आवश्यक' }, { status: 403 })
 
   let form: FormData
   try {

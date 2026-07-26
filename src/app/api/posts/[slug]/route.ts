@@ -1,7 +1,7 @@
 // Single post API — public GET (by slug) + admin PATCH (edit) + DELETE.
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
@@ -15,8 +15,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'secretary')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'संपादक या उच्च अनुमति आवश्यक' }, { status: 403 })
   const { slug } = await params
   const existing = await db.post.findUnique({ where: { slug } })
   if (!existing) return NextResponse.json({ error: 'not_found' }, { status: 404 })
@@ -57,8 +57,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sl
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
   const { slug } = await params
   const existing = await db.post.findUnique({ where: { slug } })
   if (!existing) return NextResponse.json({ error: 'not_found' }, { status: 404 })

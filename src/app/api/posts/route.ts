@@ -2,7 +2,7 @@
 // Master doc §4.2.
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export async function GET(req: NextRequest) {
@@ -38,8 +38,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'secretary')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'संपादक या उच्च अनुमति आवश्यक' }, { status: 403 })
 
   let body: { title?: string; slug?: string; excerpt?: string; content?: string; coverImage?: string; category?: string; status?: string; tags?: string[] }
   try {

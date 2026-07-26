@@ -1,7 +1,7 @@
 // Public: list announcements (active, non-expired); Admin: full CRUD
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export async function GET() {
@@ -16,8 +16,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'secretary')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'संपादक या उच्च अनुमति आवश्यक' }, { status: 403 })
 
   const body = await req.json()
   const { titleHi, titleEn, bodyHi, bodyEn, pinned, expiresAt } = body
@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
   const id = req.nextUrl.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'missing id' }, { status: 400 })
   const existing = await db.announcement.findUnique({ where: { id } })

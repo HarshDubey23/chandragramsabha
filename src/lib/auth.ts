@@ -147,3 +147,29 @@ export async function getSessionUser(cookieHeader: string | null): Promise<Sessi
   )
   return verifySessionToken(cookies[COOKIE_NAME])
 }
+
+// ── RBAC helpers (master doc §5.3) ──────────────────────────────────────
+// Role hierarchy: admin > secretary > viewer
+// - admin: full access (all mutations)
+// - secretary: content edits (posts, images, announcements, complaints status)
+// - viewer: read-only (no mutations)
+const ROLE_LEVELS: Record<string, number> = { viewer: 0, secretary: 1, admin: 2 }
+
+/** Check if a user has at least the required role level. */
+export function hasRole(user: SessionUser | null, required: 'viewer' | 'secretary' | 'admin'): boolean {
+  if (!user) return false
+  return (ROLE_LEVELS[user.role] ?? 0) >= (ROLE_LEVELS[required] ?? 0)
+}
+
+/** Require authentication + role; returns user or null. Use in API routes:
+ *  const user = requireRole(req, 'secretary'); if (!user) return 401/403 */
+export async function requireRole(
+  cookieHeader: string | null,
+  required: 'viewer' | 'secretary' | 'admin'
+): Promise<SessionUser | null> {
+  const user = await getSessionUser(cookieHeader)
+  if (!user) return null
+  if (!hasRole(user, required)) return null
+  return user
+}
+

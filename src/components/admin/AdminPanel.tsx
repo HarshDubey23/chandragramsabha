@@ -32,6 +32,7 @@ import {
   Vote,
   Newspaper,
   Database,
+  Users,
 } from 'lucide-react'
 import type { SessionUser } from './lib'
 import { Dashboard } from './Dashboard'
@@ -47,8 +48,9 @@ import { MarketplaceManager } from './MarketplaceManager'
 import { NotificationBell } from './NotificationBell'
 import { BlogManager } from './BlogManager'
 import { ContentEditor } from './ContentEditor'
+import { UserManagement } from './UserManagement'
 
-type TabKey = 'dashboard' | 'profile' | 'images' | 'complaints' | 'feedback' | 'polls' | 'marketplace' | 'announcements' | 'blog' | 'content' | 'csv' | 'activity'
+type TabKey = 'dashboard' | 'profile' | 'images' | 'complaints' | 'feedback' | 'polls' | 'marketplace' | 'announcements' | 'blog' | 'content' | 'users' | 'csv' | 'activity'
 
 export function AdminPanel() {
   const { locale } = useI18n()
@@ -88,6 +90,7 @@ export function AdminPanel() {
     { key: 'announcements', hi: 'घोषणाएँ', en: 'Announcements', icon: Bell, roles: ['admin', 'secretary'] },
     { key: 'blog', hi: 'ब्लॉग', en: 'Blog', icon: Newspaper, roles: ['admin', 'secretary'] },
     { key: 'content', hi: 'सामग्री', en: 'Content', icon: Database, roles: ['admin'] },
+    { key: 'users', hi: 'उपयोगकर्ता', en: 'Users', icon: Users, roles: ['admin'] },
     { key: 'csv', hi: 'CSV अपलोड', en: 'CSV Upload', icon: FileSpreadsheet, roles: ['admin'] },
     { key: 'activity', hi: 'गतिविधि लॉग', en: 'Activity Log', icon: ScrollText, roles: ['admin'] },
   ]
@@ -289,6 +292,7 @@ export function AdminPanel() {
           <TabsContent value="announcements"><AnnouncementsManager /></TabsContent>
           <TabsContent value="blog"><BlogManager /></TabsContent>
           <TabsContent value="content"><ContentEditor /></TabsContent>
+          <TabsContent value="users"><UserManagement /></TabsContent>
           <TabsContent value="csv"><CsvUpload /></TabsContent>
           <TabsContent value="activity"><ActivityLog /></TabsContent>
         </div>

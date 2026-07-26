@@ -3,7 +3,7 @@
 // education, health, scheme coverage etc. without code changes.
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ key: string }> }) {
@@ -18,8 +18,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ key:
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ key: string }> }) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
   const { key } = await params
 
   let body: { data?: unknown }
