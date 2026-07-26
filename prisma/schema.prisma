@@ -303,3 +303,14 @@ model Post {
   @@index([category])
   @@index([publishedAt])
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Dynamic Content Sections (master doc §4.3) — admin-editable portal data
+// Stores JSON for each section so admin can update without code changes.
+// ────────────────────────────────────────────────────────────────────────────
+model ContentSection {
+  key       String   @id // e.g. "village_stats", "infrastructure", "education"
+  data      String   // JSON string with all section-specific data
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}

@@ -120,7 +120,7 @@ export function ImageUploadDialog({ onUploaded }: UploadDialogProps) {
           {isHi ? 'तस्वीर अपलोड करें' : 'Upload Image'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-gradient-tricolor">
             <Upload className="h-4 w-4 text-primary" />

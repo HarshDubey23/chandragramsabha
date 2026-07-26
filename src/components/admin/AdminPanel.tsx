@@ -31,6 +31,7 @@ import {
   Store,
   Vote,
   Newspaper,
+  Database,
 } from 'lucide-react'
 import type { SessionUser } from './lib'
 import { Dashboard } from './Dashboard'
@@ -45,8 +46,9 @@ import { PollsManager } from './PollsManager'
 import { MarketplaceManager } from './MarketplaceManager'
 import { NotificationBell } from './NotificationBell'
 import { BlogManager } from './BlogManager'
+import { ContentEditor } from './ContentEditor'
 
-type TabKey = 'dashboard' | 'profile' | 'images' | 'complaints' | 'feedback' | 'polls' | 'marketplace' | 'announcements' | 'blog' | 'csv' | 'activity'
+type TabKey = 'dashboard' | 'profile' | 'images' | 'complaints' | 'feedback' | 'polls' | 'marketplace' | 'announcements' | 'blog' | 'content' | 'csv' | 'activity'
 
 export function AdminPanel() {
   const { locale } = useI18n()
@@ -195,6 +197,7 @@ export function AdminPanel() {
     { key: 'marketplace', hi: 'बाजार', en: 'Market', icon: Store },
     { key: 'announcements', hi: 'घोषणाएँ', en: 'Announcements', icon: Bell },
     { key: 'blog', hi: 'ब्लॉग', en: 'Blog', icon: Newspaper },
+    { key: 'content', hi: 'सामग्री', en: 'Content', icon: Database },
     { key: 'csv', hi: 'CSV अपलोड', en: 'CSV Upload', icon: FileSpreadsheet },
     { key: 'activity', hi: 'गतिविधि लॉग', en: 'Activity Log', icon: ScrollText },
   ]
@@ -262,6 +265,7 @@ export function AdminPanel() {
           <TabsContent value="marketplace"><MarketplaceManager /></TabsContent>
           <TabsContent value="announcements"><AnnouncementsManager /></TabsContent>
           <TabsContent value="blog"><BlogManager /></TabsContent>
+          <TabsContent value="content"><ContentEditor /></TabsContent>
           <TabsContent value="csv"><CsvUpload /></TabsContent>
           <TabsContent value="activity"><ActivityLog /></TabsContent>
         </div>

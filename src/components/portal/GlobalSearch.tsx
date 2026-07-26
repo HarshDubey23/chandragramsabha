@@ -97,7 +97,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[560px] p-0 gap-0 overflow-hidden" aria-describedby={undefined}>
         <DialogHeader className="sr-only">
           <DialogTitle>{isHi ? 'वैश्विक खोज' : 'Global Search'}</DialogTitle>
         </DialogHeader>

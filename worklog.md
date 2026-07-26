@@ -149,3 +149,49 @@ Task: QA, fix hydration bug, add citizen web complaint form, Blog/CMS system, gl
 3. Admin RBAC (P2 §5.3) — 4 roles (SuperAdmin/Editor/DepartmentOfficial/Viewer).
 4. Replace execCommand editor with TipTap for robustness.
 5. Image optimization pipeline (P2 §5.1) — batch convert 88 JPGs to WebP.
+
+---
+Task ID: 13
+Agent: webDevReview cron (round 3)
+Task: Seed richer content, build dynamic content system, fix accessibility warnings
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos + 3 videos, admin panel with 11 tabs, scrypt auth, image upload API + UI, SSE notifications, citizen complaint form, blog/CMS, global search. Production-stable.
+
+## Work Completed This Round
+
+### Content Seeding (richer initial content)
+- Created `src/lib/seed-content.ts` — seeded 8 marketplace items (produce/livestock/handcraft/equipment/services) with real WhatsApp images, bilingual titles, prices, ward numbers, seller info. All approved + active.
+- Seeded 4 blog posts (PMAY-G housing progress, MGNREGA expenditure, Independence Day 2026 celebration, Jal Jeevan Mission coverage) with rich HTML content, real WhatsApp cover images, category tags, published status.
+- Marketplace now shows 8 listings (was 0). Blog now shows 5 posts (was 1). VLM rated marketplace 8/10, blog 9/10.
+
+### Dynamic Content System (master doc §4.3)
+- Added `ContentSection` model to Prisma schema (key, data JSON, updatedAt, updatedBy). Pushed to DB.
+- Created `/api/content/[key]` API: public GET (returns parsed JSON + updatedAt), admin PUT (validates, upserts, audit logs).
+- Created `src/lib/seed-content-sections.ts` — seeded 7 content sections: village_stats (population, households, literacy, workers), infrastructure (roads, water, power, civic, sanitation), education (school, anganwadi, literacy, enrollment), health (sub-center, PHC, immunization, maternal), schemes_coverage (MGNREGA, PMAY-G, JJM, pension, SBM-G), shg_directory (4 groups with members/savings), emergency_contacts (8 contacts).
+- Created `ContentEditor` admin component: 7-button section selector grid, JSON textarea editor with syntax, save/revert buttons, dirty indicator, updated timestamp, char count, validation. Added as "सामग्री" tab in AdminPanel (now 12 tabs).
+- Updated `VillageStats` component to fetch `schemes_coverage` from content API instead of hardcoded values — admin can now edit MGNREGA/PMAY-G/JJM coverage percentages and the public chart updates instantly.
+
+### Accessibility Fixes
+- Fixed 2 DialogContent accessibility warnings ("Missing Description or aria-describedby") by adding `aria-describedby={undefined}` to 5 dialogs: GlobalSearch, BlogSection reader, VideoGallery player, ImageUploadDialog, BlogManager editor. Console warnings reduced from 2 → 0.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings (was 2 accessibility warnings).
+- Admin panel: 12 tabs (added सामग्री/Content tab), ContentEditor loads JSON data, save flow works.
+- Marketplace: 8 listings visible with images, stats show correct counts.
+- Blog: 5 posts visible with cover images, category filters, reading dialog.
+- Content API: returns village_stats JSON correctly (HTTP 200).
+- VLM ratings: Marketplace 8/10, Blog 9/10, Content Editor 8/10.
+
+## Unresolved Issues / Risks
+- ContentEditor uses raw JSON textarea — powerful but requires JSON knowledge. Future: structured forms per section type.
+- VillageStats scheme coverage now dynamic, but other sections (Infrastructure, Education, Health) still use hardcoded data in components — would need component refactoring to fetch from content API.
+- Only VillageStats fetches from content API; full dynamic conversion of all sections is a larger task.
+
+## Priority Recommendations for Next Phase
+1. Refactor Infrastructure/Education/Health sections to fetch from content API (full §4.3 completion).
+2. Admin RBAC (P2 §5.3) — 4 roles with permission checks.
+3. Image optimization pipeline (P2 §5.1) — batch convert 88 JPGs to WebP.
+4. Replace execCommand blog editor with TipTap for robustness.
+5. Structured form editors for content sections (instead of raw JSON).

@@ -316,7 +316,7 @@ function PostEditor({ post, open, onOpenChange, onSaved, isHi }: {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!saving) onOpenChange(o) }}>
-      <DialogContent className="sm:max-w-[760px] max-h-[92vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[760px] max-h-[92vh] overflow-y-auto" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-gradient-tricolor">
             <Newspaper className="h-4 w-4 text-primary" />

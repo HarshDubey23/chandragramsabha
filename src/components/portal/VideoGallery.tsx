@@ -200,7 +200,7 @@ export function VideoGallery() {
 
         {/* Player dialog */}
         <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-          <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden">
+          <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden" aria-describedby={undefined}>
             <DialogHeader className="p-4 pb-2">
               <DialogTitle className="flex items-center gap-2 text-gradient-tricolor text-base">
                 <Video className="h-4 w-4 text-primary" />

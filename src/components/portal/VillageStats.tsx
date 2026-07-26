@@ -54,10 +54,12 @@ export function VillageStats() {
   const { locale } = useI18n()
   const [stats, setStats] = useState<StatsData | null>(null)
   const [images, setImages] = useState<ImageAsset[]>([])
+  const [schemeData, setSchemeData] = useState<{ mgnrega?: { coverage_pct: number }; pmay_g?: { coverage_pct: number }; jjm?: { coverage_pct: number } } | null>(null)
 
   useEffect(() => {
     fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {})
     fetch('/api/images').then(r => r.json()).then(d => setImages(d.images || [])).catch(() => {})
+    fetch('/api/content/schemes_coverage').then(r => r.ok ? r.json() : null).then(d => d?.data && setSchemeData(d.data)).catch(() => {})
   }, [])
 
   const isHi = locale === 'hi'
@@ -74,23 +76,14 @@ export function VillageStats() {
 
   const totalComplaints = stats?.complaints.total || 0
 
-  // Scheme coverage data for bar chart
+  // Scheme coverage data for bar chart — fetched from content API (admin-editable)
+  const mCov = schemeData?.mgnrega?.coverage_pct ?? 76
+  const pCov = schemeData?.pmay_g?.coverage_pct ?? 63
+  const jCov = schemeData?.jjm?.coverage_pct ?? 93
   const schemeCoverageData = [
-    {
-      name: isHi ? 'मनरेगा' : 'MGNREGA',
-      coverage: 76,  // 142/187 active job cards
-      label: isHi ? '76% सक्रिय' : '76% Active',
-    },
-    {
-      name: isHi ? 'पीएमआवास' : 'PMAY-G',
-      coverage: 63,  // 24/38 completed
-      label: isHi ? '63% पूर्ण' : '63% Done',
-    },
-    {
-      name: isHi ? 'जल जीवन' : 'JJM',
-      coverage: 93,  // 174/187 tap coverage
-      label: isHi ? '93% कवर्ड' : '93% Covered',
-    },
+    { name: isHi ? 'मनरेगा' : 'MGNREGA', coverage: mCov, label: isHi ? `${mCov}% सक्रिय` : `${mCov}% Active` },
+    { name: isHi ? 'पीएमआवास' : 'PMAY-G', coverage: pCov, label: isHi ? `${pCov}% पूर्ण` : `${pCov}% Done` },
+    { name: isHi ? 'जल जीवन' : 'JJM', coverage: jCov, label: isHi ? `${jCov}% कवर्ड` : `${jCov}% Covered` },
   ]
 
   // Infrastructure category counts from images

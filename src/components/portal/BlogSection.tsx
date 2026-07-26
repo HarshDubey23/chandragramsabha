@@ -234,7 +234,7 @@ export function BlogSection() {
 
         {/* Post reader dialog */}
         <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) { setDialogOpen(false); setSelectedPost(null) } }}>
-          <DialogContent className="sm:max-w-[720px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[720px] max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
             {selectedPost && (
               <>
                 <DialogHeader>
