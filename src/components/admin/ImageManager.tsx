@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Eye, EyeOff, ImageOff, Loader2, Pencil, Save, Search } from 'lucide-react'
 import { IMAGE_CATEGORIES } from './lib'
+import { ImageUploadDialog } from './ImageUploadDialog'
 
 interface ImageAsset {
   id: string
@@ -153,15 +154,18 @@ export function ImageManager() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold section-heading">
-          {locale === 'hi' ? 'गैलरी प्रबंधक' : 'Gallery Manager'}
-        </h2>
-        <p className="text-xs text-muted-foreground mt-2">
-          {locale === 'hi'
-            ? `${images.length} छवियाँ — कैप्शन, श्रेणी एवं दृश्यता संपादित करें।`
-            : `${images.length} images — edit captions, category, and visibility.`}
-        </p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-lg font-semibold section-heading">
+            {locale === 'hi' ? 'गैलरी प्रबंधक' : 'Gallery Manager'}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-2">
+            {locale === 'hi'
+              ? `${images.length} छवियाँ — कैप्शन, श्रेणी एवं दृश्यता संपादित करें।`
+              : `${images.length} images — edit captions, category, and visibility.`}
+          </p>
+        </div>
+        <ImageUploadDialog onUploaded={load} />
       </div>
 
       {/* ── Search & filter bar ── */}

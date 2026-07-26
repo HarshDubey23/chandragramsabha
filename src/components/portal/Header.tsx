@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetHeader,
 } from '@/components/ui/sheet'
-import { Menu, Shield, Phone, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store } from 'lucide-react'
+import { Menu, Shield, Phone, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store, Video } from 'lucide-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   DropdownMenu,
@@ -61,6 +61,7 @@ export function Header() {
     { key: 'faq', labelHi: 'सहायता', labelEn: 'Help', icon: HelpCircle, view: 'home' as const, scroll: 'faq' },
     { key: 'infrastructure', labelHi: 'आधारभूत', labelEn: 'Infra', icon: Droplets, view: 'home' as const, scroll: 'infrastructure' },
     { key: 'gallery', labelHi: 'गैलरी', labelEn: 'Gallery', icon: Image, view: 'home' as const, scroll: 'gallery' },
+    { key: 'videos', labelHi: 'वीडियो', labelEn: 'Videos', icon: Video, view: 'home' as const, scroll: 'videos' },
     { key: 'eligibility', labelHi: 'पात्रता', labelEn: 'Eligibility', icon: ClipboardCheck, view: 'home' as const, scroll: 'eligibility' },
   ]
 

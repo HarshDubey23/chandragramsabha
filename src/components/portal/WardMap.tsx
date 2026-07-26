@@ -731,6 +731,7 @@ export function WardMap() {
                       <motion.g
                         key={`lm-${idx}`}
                         transform={`translate(${lm.x}, ${lm.y})`}
+                        initial={{ scale: 1, opacity: 0.6 }}
                         animate={
                           isWardSelected
                             ? { scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }

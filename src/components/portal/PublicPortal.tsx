@@ -25,6 +25,7 @@ import { DocumentChecklist } from './DocumentChecklist'
 import { FAQSection } from './FAQSection'
 import { Infrastructure } from './Infrastructure'
 import { PhotoGallery } from './PhotoGallery'
+import { VideoGallery } from './VideoGallery'
 import { VillageTimeline } from './VillageTimeline'
 import { Announcements } from './Announcements'
 import { CitizenServiceTracker } from './CitizenServiceTracker'
@@ -70,6 +71,7 @@ export function PublicPortal() {
       <FAQSection />
       <Infrastructure />
       <PhotoGallery />
+      <VideoGallery />
       <VillageTimeline />
       <Announcements />
     </>
