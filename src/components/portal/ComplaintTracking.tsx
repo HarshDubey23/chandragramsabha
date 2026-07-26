@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Search, Phone, Mic, ArrowLeft, Clock, CheckCircle2, AlertCircle, XCircle, Loader2, Send, FileText, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CitizenFeedback } from './CitizenFeedback'
+import { NotificationSubscription } from './NotificationSubscription'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -257,6 +258,9 @@ export function ComplaintTracking() {
               {result.status === 'Resolved' && (
                 <CitizenFeedback trackingId={result.trackingId} />
               )}
+
+              {/* Notification Subscription — citizens can subscribe to status updates */}
+              <NotificationSubscription trackingId={result.trackingId} locale={locale} />
             </CardContent>
           </Card>
         )}

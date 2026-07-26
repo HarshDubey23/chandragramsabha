@@ -314,3 +314,20 @@ model ContentSection {
   updatedAt DateTime @updatedAt
   updatedBy String?
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Citizen Notification Subscriptions (master doc §9.2)
+// Citizens subscribe to complaint status updates by tracking ID + phone.
+// ────────────────────────────────────────────────────────────────────────────
+model NotificationSubscription {
+  id          String   @id @default(cuid())
+  trackingId  String   // links to Complaint.trackingId
+  phone       String   // citizen phone for WhatsApp/SMS
+  channel     String   @default("sms") // "sms" | "whatsapp" | "both"
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([trackingId])
+  @@index([phone])
+}

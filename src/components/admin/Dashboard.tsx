@@ -280,6 +280,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
   const [recent, setRecent] = useState<Complaint[] | null>(null)
   const [feedbackStats, setFeedbackStats] = useState<{ total: number; average: number; distribution: { rating: number; count: number }[] } | null>(null)
   const [complaintTrend, setComplaintTrend] = useState<{ month: string; monthHi: string; total: number; resolved: number; pending: number; resolutionRate: number }[] | null>(null)
+  const [wardAnalytics, setWardAnalytics] = useState<{ wards: { ward: number; name: string; population: number; households: number; marketplaceItems: number; activityPer100: number }[]; summary: { totalWards: number; totalPopulation: number; totalHouseholds: number; totalMarketplaceItems: number; avgItemsPerWard: number } } | null>(null)
   const [loading, setLoading] = useState(true)
 
   // System status checks
@@ -293,13 +294,15 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
       fetch('/api/complaints/list').then(r => r.json()),
       fetch('/api/feedback/stats').then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/complaints/stats').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/analytics/wards').then(r => r.ok ? r.json() : null).catch(() => null),
     ])
-      .then(([s, c, f, ct]) => {
+      .then(([s, c, f, ct, wa]) => {
         if (!alive) return
         setStats(s)
         setRecent((c.complaints || []).slice(0, 5))
         if (f) setFeedbackStats(f)
         if (ct?.trend) setComplaintTrend(ct.trend)
+        if (wa?.wards) setWardAnalytics(wa)
       })
       .catch(() => {
         if (!alive) return
@@ -750,6 +753,66 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
                   </>
                 )
               })()}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Multi-Ward Comparative Analytics ───────────────────────────────── */}
+      {wardAnalytics && wardAnalytics.summary.totalMarketplaceItems > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Home className="h-4 w-4 text-primary" />
+              {locale === 'hi' ? 'वार्ड तुलनात्मक विश्लेषण' : 'Ward Comparative Analytics'}
+              <Badge variant="outline" className="text-[9px] ml-auto gap-1">
+                {locale === 'hi' ? `${wardAnalytics.summary.totalWards} वार्ड` : `${wardAnalytics.summary.totalWards} wards`}
+              </Badge>
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              {locale === 'hi' ? 'जनसंख्या एवं बाजार गतिविधि के अनुसार वार्ड तुलना।' : 'Ward comparison by population and marketplace activity.'}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={wardAnalytics.wards.map(w => ({ name: `W${w.ward}`, nameFull: w.name, ...w }))} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} className="text-muted-foreground" width={35} />
+                <Tooltip
+                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}
+                  formatter={(val: number, name: string) => {
+                    if (name === 'population') return [val, locale === 'hi' ? 'जनसंख्या' : 'Population']
+                    if (name === 'marketplaceItems') return [val, locale === 'hi' ? 'बाजार वस्तुएँ' : 'Market Items']
+                    return [val, name]
+                  }}
+                  labelFormatter={(label, payload) => {
+                    const item = payload?.[0]?.payload
+                    return item ? `Ward ${item.ward}: ${item.nameFull}` : label
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '11px' }} formatter={(v) => v === 'population' ? (locale === 'hi' ? 'जनसंख्या' : 'Population') : v === 'marketplaceItems' ? (locale === 'hi' ? 'बाजार' : 'Market') : v} />
+                <Bar dataKey="population" fill="oklch(0.62 0.18 55)" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="marketplaceItems" fill="oklch(0.60 0.14 145)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="grid grid-cols-4 gap-2 mt-3 text-center">
+              <div className="p-2 rounded-lg bg-secondary/40">
+                <div className="text-sm font-bold text-primary">{wardAnalytics.summary.totalPopulation}</div>
+                <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'कुल जनसंख्या' : 'Total Pop.'}</div>
+              </div>
+              <div className="p-2 rounded-lg bg-secondary/40">
+                <div className="text-sm font-bold text-primary">{wardAnalytics.summary.totalHouseholds}</div>
+                <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'घर' : 'Households'}</div>
+              </div>
+              <div className="p-2 rounded-lg bg-green-600/5">
+                <div className="text-sm font-bold text-green-700 dark:text-green-400">{wardAnalytics.summary.totalMarketplaceItems}</div>
+                <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'बाजार वस्तुएँ' : 'Market Items'}</div>
+              </div>
+              <div className="p-2 rounded-lg bg-amber-500/5">
+                <div className="text-sm font-bold text-amber-600">{wardAnalytics.summary.avgItemsPerWard}</div>
+                <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'औसत/वार्ड' : 'Avg/Ward'}</div>
+              </div>
             </div>
           </CardContent>
         </Card>

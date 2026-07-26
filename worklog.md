@@ -515,3 +515,51 @@ Task: Complaint trend chart, PWA offline fallback page
 3. Add citizen notification system (email/SMS when complaint status changes).
 4. Add multi-ward comparative analytics dashboard.
 5. Add WhatsApp Business API integration for real notifications.
+
+---
+Task ID: 20
+Agent: webDevReview cron (round 10)
+Task: Multi-ward analytics, citizen notification subscription system
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos (WebP) + 3 videos, admin panel with 13 tabs (full RBAC), dynamic content system with 7 structured form editors, citizen complaint form, blog/CMS, global search, marketplace, PWA install prompt + offline page, blur-up lazy loading, activity log CSV export, feedback rating chart, complaint trend chart. Production-stable.
+
+## Work Completed This Round
+
+### Multi-Ward Comparative Analytics Dashboard
+- Created `/api/analytics/wards` endpoint: aggregates population, households, and marketplace items per ward (10 wards). Returns ward-level data + summary stats. Viewer+ role required.
+- Added horizontal BarChart to admin Dashboard: 10 wards with population (saffron bars) + marketplace items (green bars) side by side. Vertical layout for readability, custom tooltip with ward name, bilingual legend.
+- Added summary stats grid below chart: total population, households, marketplace items, avg items per ward.
+- Verified: API returns correct data (10 wards, 1247 population, 8 marketplace items, 0.8 avg/ward).
+
+### Citizen Notification Subscription System (master doc §9.2)
+- Added `NotificationSubscription` model to Prisma schema (id, trackingId, phone, channel, active, timestamps). Pushed to DB.
+- Created `/api/notifications/subscribe` API with 3 methods:
+  - **GET**: check subscription status by trackingId
+  - **POST**: subscribe to notifications (validates trackingId exists, phone format, channel choice)
+  - **DELETE**: unsubscribe
+- Created `NotificationSubscription` portal component: subscribe form with phone input, channel selector (WhatsApp/SMS/Both with icons), subscribe button with loading state, success confirmation card with channel-specific message.
+- Integrated into ComplaintTracking page — appears after a complaint is tracked, so citizens can subscribe to status updates.
+- Tested: subscribe API returns HTTP 200 with bilingual success message.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings, 0 404s.
+- 200 images loading (0 broken) — all WebP with blur-up placeholder.
+- Wards analytics API: returns 10 wards with correct data (HTTP 200).
+- Notification subscribe API: creates subscription successfully (HTTP 200).
+- Dashboard: ward analytics chart renders with population + marketplace comparison.
+- ComplaintTracking: notification subscription form appears after tracking.
+
+## Unresolved Issues / Risks
+- BlogManager still uses execCommand (deprecated but functional) — TipTap upgrade is future work.
+- Scheme enrollment historical tracking still pending (would need time-series model).
+- Notification system stores subscriptions but doesn't send actual messages yet — would need WhatsApp Business API / SMS gateway integration.
+- Ward-level complaint data not tracked (Complaint model has no ward field) — marketplace activity used as proxy.
+
+## Priority Recommendations for Next Phase
+1. Integrate WhatsApp Business API / SMS gateway for actual notification dispatch.
+2. Replace execCommand blog editor with TipTap for robustness.
+3. Add scheme enrollment historical tracking model + time-series chart.
+4. Add ward field to Complaint model for true ward-level complaint analytics.
+5. Add admin notification dashboard (view all subscriptions, send bulk notices).
