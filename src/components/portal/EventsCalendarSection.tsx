@@ -226,7 +226,7 @@ const EVENT_ICON: Record<PanchayatEvent['icon'], React.ReactNode> = {
 // Real panchayat photographs — past event highlights (visual evidence)
 const EVENT_PHOTOS = [
   {
-    src: '/whatsapp/IMG-20260725-WA0080.jpg',
+    src: '/whatsapp-optimized/IMG-20260725-WA0080.webp',
     titleHi: 'ग्राम सभा — सामूहिक सभा',
     titleEn: 'Gram Sabha — Public Gathering',
     descHi: 'ग्राम चंद्रा में आयोजित सामूहिक ग्राम सभा का वास्तविक दृश्य।',
@@ -235,7 +235,7 @@ const EVENT_PHOTOS = [
     tagEn: 'Governance',
   },
   {
-    src: '/whatsapp/IMG-20260725-WA0016.jpg',
+    src: '/whatsapp-optimized/IMG-20260725-WA0016.webp',
     titleHi: 'रात्रिकालीन बैठक',
     titleEn: 'Night Meeting',
     descHi: 'ग्रामीणों की रात्रिकालीन बैठक — योजना चर्चा एवं जनसमस्याओं का समाधान।',

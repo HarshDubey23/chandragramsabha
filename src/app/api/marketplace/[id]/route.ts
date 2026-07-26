@@ -3,17 +3,15 @@
 // - DELETE /api/marketplace/[id] → admin-only: delete listing
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 
 // ── PATCH — admin-only update ──────────────────────────────────────────────
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
 
   const { id } = await params
   const existing = await db.marketplaceItem.findUnique({ where: { id } })
@@ -97,10 +95,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
 
   const { id } = await params
   const existing = await db.marketplaceItem.findUnique({ where: { id } })

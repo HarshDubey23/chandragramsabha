@@ -30,7 +30,7 @@ interface VideoItem {
 const VIDEOS: VideoItem[] = [
   {
     src: '/whatsapp/VID-20260725-WA0094.mp4',
-    thumb: '/whatsapp/VID-20260725-WA0094-thumb.jpg',
+    thumb: '/whatsapp-optimized/VID-20260725-WA0094-thumb.webp',
     titleHi: 'विद्यालय बैग वितरण',
     titleEn: 'School Bag Distribution',
     descHi: 'ग्राम पंचायत चंद्रा में विद्यालय बैग वितरण कार्यक्रम',
@@ -39,7 +39,7 @@ const VIDEOS: VideoItem[] = [
   },
   {
     src: '/whatsapp/VID-20260725-WA0095.mp4',
-    thumb: '/whatsapp/VID-20260725-WA0095-thumb.jpg',
+    thumb: '/whatsapp-optimized/VID-20260725-WA0095-thumb.webp',
     titleHi: 'विद्यालय सांस्कृतिक कार्यक्रम',
     titleEn: 'School Cultural Program',
     descHi: 'विद्यालय सभा में बच्चों द्वारा सांस्कृतिक नृत्य प्रस्तुति',
@@ -48,7 +48,7 @@ const VIDEOS: VideoItem[] = [
   },
   {
     src: '/whatsapp/VID-20260725-WA0096.mp4',
-    thumb: '/whatsapp/VID-20260725-WA0096-thumb.jpg',
+    thumb: '/whatsapp-optimized/VID-20260725-WA0096-thumb.webp',
     titleHi: 'विद्यालय कक्षा नेतृत्व पट्टिका',
     titleEn: 'School Class Leaders Board',
     descHi: 'प्राथमिक विद्यालय की कक्षा नेतृत्व पट्टिका का प्रदर्शन',

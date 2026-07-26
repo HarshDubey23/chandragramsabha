@@ -94,7 +94,7 @@ export function Infrastructure() {
         {/* Featured real-photo highlights — well construction & water tanker supply */}
         <div className="grid sm:grid-cols-2 gap-4 mb-8">
           <FeaturedPhotoCard
-            src="/whatsapp/IMG-20260725-WA0042.jpg"
+            src="/whatsapp-optimized/IMG-20260725-WA0042.webp"
             icon={Hammer}
             tagHi="वास्तविक तस्वीर / Real photo"
             tagEn="वास्तविक तस्वीर / Real photo"
@@ -105,7 +105,7 @@ export function Infrastructure() {
             locale={locale}
           />
           <FeaturedPhotoCard
-            src="/whatsapp/IMG-20260725-WA0020.jpg"
+            src="/whatsapp-optimized/IMG-20260725-WA0020.webp"
             icon={Droplets}
             tagHi="वास्तविक तस्वीर / Real photo"
             tagEn="वास्तविक तस्वीर / Real photo"

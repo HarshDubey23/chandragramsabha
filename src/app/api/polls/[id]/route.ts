@@ -3,7 +3,7 @@
 // - DELETE /api/polls/[id]  → admin: delete poll (cascades options + votes)
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
@@ -13,11 +13,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  if (user.role === 'viewer') {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
 
   const { id } = await params
 
@@ -118,11 +115,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  if (user.role === 'viewer') {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
 
   const { id } = await params
 

@@ -3,7 +3,7 @@
 // - GET  /api/feedback     → admin-only listing with pagination + trackingId filter
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 
 // ── POST — public submission ────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -76,10 +76,8 @@ export async function POST(req: NextRequest) {
 
 // ── GET — admin-only listing ────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'viewer')
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 403 })
 
   const sp = req.nextUrl.searchParams
   const pageRaw = Number(sp.get('page') ?? '1')

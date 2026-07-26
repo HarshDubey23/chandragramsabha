@@ -8,6 +8,7 @@ import { AdminPanel } from '@/components/admin/AdminPanel'
 import { ScrollProgress } from '@/components/portal/ScrollProgress'
 import { BackToTop } from '@/components/portal/BackToTop'
 import { ServiceWorkerRegister } from '@/components/portal/ServiceWorkerRegister'
+import { InstallPrompt } from '@/components/portal/InstallPrompt'
 import { useUI } from '@/lib/ui-store'
 import { useI18n } from '@/lib/i18n'
 
@@ -35,6 +36,7 @@ export default function Home() {
       <Footer />
       <BackToTop />
       <ServiceWorkerRegister />
+      <InstallPrompt />
     </div>
   )
 }

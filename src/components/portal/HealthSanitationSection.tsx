@@ -36,7 +36,7 @@ import { ScrollReveal } from './ScrollReveal'
 
 // ── Real panchayat photograph — community water & sanitation ──
 const HEALTH_PHOTO = {
-  src: '/whatsapp/IMG-20260725-WA0020.jpg',
+  src: '/whatsapp-optimized/IMG-20260725-WA0020.webp',
   titleHi: 'सामुदायिक जल एवं स्वच्छता गतिविधि',
   titleEn: 'Community water & sanitation activity',
   descHi: 'ग्राम चंद्रा में पेयजल आपूर्ति एवं स्वच्छता अभियान का वास्तविक दृश्य।',

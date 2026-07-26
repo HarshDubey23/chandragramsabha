@@ -6,12 +6,15 @@
 //   - Network-first for /api/* (always try fresh, fall back to cache when offline)
 //   - Bypass for non-GET and cross-origin requests
 
-const SW_VERSION = 'gpchandra-sw-v1';
+const SW_VERSION = 'gpchandra-sw-v2';
 const APP_SHELL = [
   '/',
   '/manifest.json',
   '/logo.svg',
 ];
+
+// Image cache — separate cache for WhatsApp images (larger, cache-first)
+const IMAGE_CACHE = 'gpchandra-images-v1';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -22,7 +25,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== SW_VERSION).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== SW_VERSION && k !== IMAGE_CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -33,6 +36,24 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // Image requests (WebP/JPG/PNG/SVG) — cache-first for fast offline loads
+  if (req.destination === 'image' || /\.(webp|jpg|jpeg|png|svg|gif)$/i.test(url.pathname)) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then((cache) =>
+        cache.match(req).then((cached) => {
+          if (cached) return cached;
+          return fetch(req).then((res) => {
+            if (res && res.status === 200) {
+              cache.put(req, res.clone()).catch(() => {});
+            }
+            return res;
+          }).catch(() => cached || new Response('', { status: 404 }));
+        })
+      )
+    );
+    return;
+  }
 
   // API requests — network-first, fall back to cache
   if (url.pathname.startsWith('/api/')) {

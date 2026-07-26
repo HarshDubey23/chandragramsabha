@@ -2,13 +2,12 @@
 // Receives { trackingIds: string[], status: string, resolutionNote?: string }
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  if (user.role === 'viewer') return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  const user = await requireRole(req.headers.get('cookie'), 'secretary')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'संपादक या उच्च अनुमति आवश्यक' }, { status: 403 })
 
   const body = await req.json()
   const { trackingIds, status, resolutionNote } = body

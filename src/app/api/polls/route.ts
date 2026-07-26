@@ -3,7 +3,7 @@
 // - POST /api/polls       → admin-only: create a new poll (2-6 bilingual options)
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser, requireRole } from '@/lib/auth'
 import { logActivity } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
@@ -54,11 +54,8 @@ export async function GET() {
 
 // ── POST — admin-only create ────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser(req.headers.get('cookie'))
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  if (user.role === 'viewer') {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
-  }
+  const user = await requireRole(req.headers.get('cookie'), 'admin')
+  if (!user) return NextResponse.json({ error: 'unauthorized', message: 'सुपर एडमिन अनुमति आवश्यक' }, { status: 403 })
 
   let body: {
     questionHi?: unknown

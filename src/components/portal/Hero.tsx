@@ -13,11 +13,11 @@ import { motion } from 'framer-motion'
 // photograph (flag hoisting at the panchayat bhawan, primary school building,
 // village gathering, water tanker, well construction).
 const HERO_IMAGES = [
-  { src: '/whatsapp/IMG-20260725-WA0072.jpg', credit: 'झंडारोहण, पंचायत भवन / Flag hoisting, Panchayat Bhawan' },
-  { src: '/whatsapp/IMG-20260725-WA0011.jpg', credit: 'प्राथमिक विद्यालय भवन / Primary school building' },
-  { src: '/whatsapp/IMG-20260725-WA0080.jpg', credit: 'ग्राम सभा आयोजन / Village gathering event' },
-  { src: '/whatsapp/IMG-20260725-WA0020.jpg', credit: 'जल टंकी आपूर्ति / Water tanker supply' },
-  { src: '/whatsapp/IMG-20260725-WA0042.jpg', credit: 'कुआँ निर्माण / Well construction' },
+  { src: '/whatsapp-optimized/IMG-20260725-WA0072.webp', credit: 'झंडारोहण, पंचायत भवन / Flag hoisting, Panchayat Bhawan' },
+  { src: '/whatsapp-optimized/IMG-20260725-WA0011.webp', credit: 'प्राथमिक विद्यालय भवन / Primary school building' },
+  { src: '/whatsapp-optimized/IMG-20260725-WA0080.webp', credit: 'ग्राम सभा आयोजन / Village gathering event' },
+  { src: '/whatsapp-optimized/IMG-20260725-WA0020.webp', credit: 'जल टंकी आपूर्ति / Water tanker supply' },
+  { src: '/whatsapp-optimized/IMG-20260725-WA0042.webp', credit: 'कुआँ निर्माण / Well construction' },
 ]
 
 export function Hero() {

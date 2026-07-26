@@ -48,14 +48,14 @@ import { ScrollReveal } from './ScrollReveal'
 // ── Real panchayat photographs — education institutions ──
 const SCHOOL_PHOTOS = [
   {
-    src: '/whatsapp/IMG-20260725-WA0011.jpg',
+    src: '/whatsapp-optimized/IMG-20260725-WA0011.webp',
     titleHi: 'प्राथमिक विद्यालय भवन',
     titleEn: 'Primary School Building',
     descHi: 'वार्ड 4 स्थित भित्तिचित्रों से युक्त प्राथमिक विद्यालय।',
     descEn: 'Primary school at Ward 4 with murals painted on walls.',
   },
   {
-    src: '/whatsapp/IMG-20260725-WA0030.jpg',
+    src: '/whatsapp-optimized/IMG-20260725-WA0030.webp',
     titleHi: 'कक्षा का आंतरिक दृश्य',
     titleEn: 'Classroom Interior View',
     descHi: 'बच्चों के लिए सुसज्जित कक्षा का दृश्य।',

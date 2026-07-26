@@ -63,7 +63,7 @@ export function About() {
         <div className="mb-6 relative rounded-xl overflow-hidden border border-border/60 shadow-md card-hover-lift indian-border-top">
           <div className="relative aspect-[21/9] sm:aspect-[3/1]">
             <img
-              src="/whatsapp/IMG-20260725-WA0072.jpg"
+              src="/whatsapp-optimized/IMG-20260725-WA0072.webp"
               alt={locale === 'hi'
                 ? 'पंचायत भवन पर ध्वजारोहण — ग्राम चंद्रा की वास्तविक तस्वीर'
                 : 'Flag hoisting at panchayat building — real photo of Gram Chandra'}

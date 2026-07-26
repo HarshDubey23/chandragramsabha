@@ -52,7 +52,7 @@ async function main() {
       value: JSON.stringify({
         name_hi: 'श्रीमती संगीता मिश्रा',
         name_en: 'Smt. Sangita Mishra',
-        photo_url: '/whatsapp/IMG-20260725-WA0003.jpg',
+        photo_url: '/whatsapp-optimized/IMG-20260725-WA0003.webp',
         education_hi: 'बी.ए. बी.टी.सी.',
         education_en: 'B.A. BTC',
         mobile_hashed: 'MOB_' + sha256('919651035021').slice(0, 10),
@@ -74,7 +74,7 @@ async function main() {
       value: JSON.stringify({
         name_hi: 'श्री बलवंत चौहान',
         name_en: 'Shri Balwant Chauhan',
-        photo_url: '/whatsapp/IMG-20260725-WA0091.jpg',
+        photo_url: '/whatsapp-optimized/IMG-20260725-WA0091.webp',
         designation_hi: 'ग्राम पंचायत अधिकारी',
         designation_en: 'Gram Panchayat Adhikari',
         mobile_hashed: 'MOB_' + sha256('919651035022').slice(0, 10),

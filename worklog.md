@@ -305,3 +305,60 @@ Task: API-level RBAC, admin user management, image optimization pipeline
 3. Structured form editors for array-type content sections (SHG groups, emergency contacts).
 4. Replace execCommand blog editor with TipTap for robustness.
 5. PWA offline caching enhancement + install prompt.
+
+---
+Task ID: 16
+Agent: webDevReview cron (round 6)
+Task: WebP image migration, complete API RBAC, PWA install prompt + offline caching
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos (now WebP-optimized) + 3 videos, admin panel with 13 tabs (full RBAC), dynamic content system, citizen complaint form, blog/CMS, global search, marketplace. Production-stable.
+
+## Work Completed This Round
+
+### WebP Image Migration (master doc §5.1 — complete)
+- Created `scripts/migrate-to-webp.ts` — updated all 88 ImageAsset URLs in DB from `/whatsapp/*.jpg` to `/whatsapp-optimized/*.webp`.
+- Updated all hardcoded image references in 9 component/seed files (Hero, RepresentativesSection, About, Infrastructure, EducationSection, HealthSanitationSection, EventsCalendarSection, BlogManager, seed-content.ts, seed.ts).
+- Generated optimized WebP thumbnails for 3 video thumbnails.
+- Result: **196 WebP images** loading on the portal (0 broken), **49MB → 16MB** total image size (67% reduction).
+- All images now use modern WebP format for faster page loads, especially on rural mobile networks.
+
+### Complete API-Level RBAC (master doc §5.3 — fully complete)
+- Applied `requireRole` to ALL remaining mutation endpoints:
+  - **Marketplace [id]**: PATCH + DELETE (admin only)
+  - **Polls**: POST create (admin), PATCH + DELETE [id] (admin) — replaced manual `role === 'viewer'` checks with `requireRole`
+  - **Complaints update**: POST (secretary+)
+  - **Complaints bulk-update**: POST (secretary+)
+  - **Feedback**: GET listing (viewer+ — all authenticated roles can see)
+- Verified with curl: unauthenticated marketplace PATCH gets 403, admin gets through.
+- All mutation endpoints now have consistent role-based access control with bilingual error messages.
+
+### PWA Install Prompt + Offline Caching (master doc §5.2)
+- Created `InstallPrompt` component: detects `beforeinstallprompt` event, shows install banner with saffron gradient, Install/Later buttons, 7-day dismiss memory, auto-hides when already installed (standalone mode).
+- Added to page.tsx — appears as floating bottom-right card when app is installable.
+- Enhanced service worker (`sw.js` v2):
+  - Added separate `IMAGE_CACHE` for WhatsApp images — cache-first strategy for instant offline image loads.
+  - Images (WebP/JPG/PNG/SVG) now served from cache when available, fetched and cached on first load.
+  - Preserves image cache across SW version updates (not deleted on activate).
+  - App shell, API requests (network-first), and other assets (stale-while-revalidate) strategies unchanged.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings.
+- **196 WebP images** loading (0 broken) — all optimized, 67% size reduction.
+- API RBAC: all mutation endpoints return 403 for insufficient roles with bilingual messages.
+- PWA: InstallPrompt component renders, service worker v2 with image caching active.
+- Marketplace RBAC: unauthenticated gets 403, admin succeeds.
+
+## Unresolved Issues / Risks
+- Original JPG files still exist in `/public/whatsapp/` (49MB) — could be deleted to save space, but kept as fallback.
+- Structured array form editor for SHG/emergency contacts still pending (raw JSON only for those 2 sections).
+- BlogManager still uses execCommand (deprecated but functional) — TipTap upgrade is future work.
+- PWA install prompt only shows in Chrome/Edge (Firefox/Safari don't support beforeinstallprompt).
+
+## Priority Recommendations for Next Phase
+1. Delete original `/public/whatsapp/` JPGs to reclaim 49MB (after confirming WebP works in production).
+2. Structured form editors for array-type content sections (SHG groups, emergency contacts).
+3. Replace execCommand blog editor with TipTap for robustness.
+4. Add PWA offline page (cached fallback HTML when fully offline).
+5. Performance: add lazy loading + blur-up placeholder for gallery images.

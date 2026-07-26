@@ -179,7 +179,7 @@ export function RepresentativesSection() {
               <CardContent className="p-6 text-center">
                 <div className="relative mx-auto mb-4 w-32 h-32">
                   <Avatar className="w-32 h-32 rounded-xl border-4 border-primary/30 shadow-lg mx-auto">
-                    <AvatarImage src="/whatsapp/IMG-20260725-WA0003.jpg" alt={isHi ? 'श्रीमती संगीता मिश्रा' : 'Smt. Sangita Mishra'} className="object-cover" />
+                    <AvatarImage src="/whatsapp-optimized/IMG-20260725-WA0003.webp" alt={isHi ? 'श्रीमती संगीता मिश्रा' : 'Smt. Sangita Mishra'} className="object-cover" />
                     <AvatarFallback className="rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary text-3xl avatar-initials">
                       {isHi ? 'समि' : 'SM'}
                     </AvatarFallback>
@@ -263,7 +263,7 @@ export function RepresentativesSection() {
               <CardContent className="p-6 text-center">
                 <div className="relative mx-auto mb-4 w-32 h-32">
                   <Avatar className="w-32 h-32 rounded-xl border-4 border-accent/40 shadow-lg mx-auto">
-                    <AvatarImage src="/whatsapp/IMG-20260725-WA0091.jpg" alt={isHi ? 'श्री बलवंत चौहान' : 'Shri Balwant Chauhan'} className="object-cover" />
+                    <AvatarImage src="/whatsapp-optimized/IMG-20260725-WA0091.webp" alt={isHi ? 'श्री बलवंत चौहान' : 'Shri Balwant Chauhan'} className="object-cover" />
                     <AvatarFallback className="rounded-xl bg-gradient-to-br from-accent/15 to-accent/5 text-accent-foreground text-3xl avatar-initials">
                       {isHi ? 'बच' : 'BC'}
                     </AvatarFallback>
