@@ -1,0 +1,732 @@
+     1→'use client'
+     2→import { useI18n } from '@/lib/i18n'
+     3→import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+     4→import { Badge } from '@/components/ui/badge'
+     5→import { Separator } from '@/components/ui/separator'
+     6→import {
+     7→  Table,
+     8→  TableHeader,
+     9→  TableBody,
+    10→  TableHead,
+    11→  TableRow,
+    12→  TableCell,
+    13→} from '@/components/ui/table'
+    14→import {
+    15→  PieChart,
+    16→  Pie,
+    17→  Cell,
+    18→  BarChart,
+    19→  Bar,
+    20→  XAxis,
+    21→  YAxis,
+    22→  Tooltip,
+    23→  ResponsiveContainer,
+    24→} from 'recharts'
+    25→import {
+    26→  GraduationCap,
+    27→  School,
+    28→  Building2,
+    29→  Baby,
+    30→  ExternalLink,
+    31→  Users,
+    32→  BookOpen,
+    33→  Award,
+    34→  Utensils,
+    35→  BookCopy,
+    36→  Library,
+    37→  Apple,
+    38→  MapPin,
+    39→  CalendarDays,
+    40→  CheckCircle2,
+    41→  Info,
+    42→  TrendingUp,
+    43→} from 'lucide-react'
+    44→import { ScrollReveal } from './ScrollReveal'
+    45→
+    46→// Warm Indian palette — NO indigo/blue
+    47→const SAFFRON = '#c2410c'
+    48→const GREEN = '#16a34a'
+    49→const STONE = '#a8a29e'
+    50→
+    51→// Schools overview data
+    52→const SCHOOLS = [
+    53→  {
+    54→    id: 'primary',
+    55→    icon: School,
+    56→    nameHi: 'प्राथमिक विद्यालय',
+    57→    nameEn: 'Primary School',
+    58→    count: 1,
+    59→    detailHi: 'वार्ड 4, स्थापित 1968',
+    60→    detailEn: 'Ward 4, established 1968',
+    61→  },
+    62→  {
+    63→    id: 'upper-primary',
+    64→    icon: Building2,
+    65→    nameHi: 'उच्च प्राथमिक विद्यालय',
+    66→    nameEn: 'Upper Primary School',
+    67→    count: 1,
+    68→    detailHi: 'शंकरगढ़, 3 किमी',
+    69→    detailEn: 'Shankargarh, 3 km',
+    70→  },
+    71→  {
+    72→    id: 'anganwadi',
+    73→    icon: Baby,
+    74→    nameHi: 'आंगनवाड़ी केंद्र',
+    75→    nameEn: 'Anganwadi Center',
+    76→    count: 2,
+    77→    detailHi: 'वार्ड 3 एवं 7',
+    78→    detailEn: 'Ward 3 & 7',
+    79→  },
+    80→]
+    81→
+    82→// Enrollment by class — Class 1-5
+    83→const ENROLLMENT = [
+    84→  { class: 'कक्षा 1', classEn: 'Class 1', boys: 15, girls: 9, total: 24 },
+    85→  { class: 'कक्षा 2', classEn: 'Class 2', boys: 12, girls: 10, total: 22 },
+    86→  { class: 'कक्षा 3', classEn: 'Class 3', boys: 11, girls: 9, total: 20 },
+    87→  { class: 'कक्षा 4', classEn: 'Class 4', boys: 10, girls: 9, total: 19 },
+    88→  { class: 'कक्षा 5', classEn: 'Class 5', boys: 9, girls: 9, total: 18 },
+    89→]
+    90→
+    91→// Teacher statistics
+    92→const TEACHER_STATS = {
+    93→  total: 4,
+    94→  male: 3,
+    95→  female: 1,
+    96→  studentTeacherRatio: '26:1',
+    97→  rteNorm: '30:1',
+    98→  qualified: '4/4',
+    99→  qualifiedPct: 100,
+   100→  pgt: 0,
+   101→  tgt: 2,
+   102→  prt: 2,
+   103→}
+   104→
+   105→// Mid-Day Meal stats
+   106→const MDM_STATS = {
+   107→  studentsCovered: 103,
+   108→  coveragePct: 100,
+   109→  cookingCost: '₹4.97',
+   110→  daysServed: 220,
+   111→}
+   112→
+   113→// Sample weekly menu (bilingual)
+   114→const WEEKLY_MENU = [
+   115→  { dayHi: 'सोमवार', dayEn: 'Mon', menuHi: 'चावल, दाल, सब्ज़ी', menuEn: 'Rice, Dal, Sabzi' },
+   116→  { dayHi: 'मंगलवार', dayEn: 'Tue', menuHi: 'रोटी, सब्ज़ी, खीर', menuEn: 'Roti, Sabzi, Kheer' },
+   117→  { dayHi: 'बुधवार', dayEn: 'Wed', menuHi: 'चावल, राजमा, सलाद', menuEn: 'Rice, Rajma, Salad' },
+   118→  { dayHi: 'गुरुवार', dayEn: 'Thu', menuHi: 'रोटी, दाल, हरी सब्ज़ी', menuEn: 'Roti, Dal, Green Sabzi' },
+   119→  { dayHi: 'शुक्रवार', dayEn: 'Fri', menuHi: 'चावल, छोले, सब्ज़ी', menuEn: 'Rice, Chole, Sabzi' },
+   120→]
+   121→
+   122→// Literacy data — donut PieChart segments
+   123→const LITERACY_DATA = [
+   124→  { nameHi: 'साक्षर पुरुष', nameEn: 'Literate Male', value: 412, pct: 76.5, color: SAFFRON },
+   125→  { nameHi: 'साक्षर महिला', nameEn: 'Literate Female', value: 275, pct: 58.7, color: GREEN },
+   126→  { nameHi: 'निरक्षर', nameEn: 'Illiterate', value: 560, pct: 45, color: STONE },
+   127→]
+   128→
+   129→// Scholarship schemes
+   130→const SCHOLARSHIPS = [
+   131→  {
+   132→    schemeHi: 'प्री-मैट्रिक छात्रवृत्ति (SC/ST)',
+   133→    schemeEn: 'Pre-Matric Scholarship (SC/ST)',
+   134→    amountHi: '₹1,500/वर्ष',
+   135→    amountEn: '₹1,500/year',
+   136→    classHi: 'कक्षा 1-8',
+   137→    classEn: 'Class 1-8',
+   138→    beneficiaries: 12,
+   139→  },
+   140→  {
+   141→    schemeHi: 'पोस्ट-मैट्रिक छात्रवृत्ति',
+   142→    schemeEn: 'Post-Matric Scholarship',
+   143→    amountHi: '₹3,500/वर्ष',
+   144→    amountEn: '₹3,500/year',
+   145→    classHi: 'कक्षा 9-12',
+   146→    classEn: 'Class 9-12',
+   147→    beneficiaries: 8,
+   148→  },
+   149→  {
+   150→    schemeHi: 'राष्ट्रीय आजीविका मिशन (NLM)',
+   151→    schemeEn: 'National Livelihood Mission (NLM)',
+   152→    amountHi: '₹2,000/वर्ष',
+   153→    amountEn: '₹2,000/year',
+   154→    classHi: 'केवल बालिकाएं',
+   155→    classEn: 'Girls only',
+   156→    beneficiaries: 6,
+   157→  },
+   158→  {
+   159→    schemeHi: 'मुफ्त यूनिफॉर्म',
+   160→    schemeEn: 'Free Uniform',
+   161→    amountHi: '₹400/वर्ष',
+   162→    amountEn: '₹400/year',
+   163→    classHi: 'सभी छात्र',
+   164→    classEn: 'All students',
+   165→    beneficiaries: 103,
+   166→  },
+   167→]
+   168→
+   169→// Recharts custom tooltip for enrollment — declared OUTSIDE the component function
+   170→// to satisfy react-hooks/static-components lint rule
+   171→function EnrollmentTooltip({
+   172→  active,
+   173→  payload,
+   174→  locale,
+   175→}: {
+   176→  active?: boolean
+   177→  payload?: Array<{ value: number; payload: { class: string; classEn: string; boys: number; girls: number; total: number } }>
+   178→  locale: 'hi' | 'en'
+   179→}) {
+   180→  if (active && payload && payload.length) {
+   181→    const d = payload[0].payload
+   182→    const cls = locale === 'hi' ? d.class : d.classEn
+   183→    const boysLbl = locale === 'hi' ? 'लड़के' : 'Boys'
+   184→    const girlsLbl = locale === 'hi' ? 'लड़कियां' : 'Girls'
+   185→    const totalLbl = locale === 'hi' ? 'कुल' : 'Total'
+   186→    return (
+   187→      <div className="bg-card border border-border rounded-md px-3 py-2 text-xs shadow-md">
+   188→        <div className="font-medium">{cls}</div>
+   189→        <div className="text-muted-foreground">{boysLbl}: {d.boys} · {girlsLbl}: {d.girls}</div>
+   190→        <div className="font-semibold">{totalLbl}: {d.total}</div>
+   191→      </div>
+   192→    )
+   193→  }
+   194→  return null
+   195→}
+   196→
+   197→// Recharts custom tooltip for literacy — declared OUTSIDE the component function
+   198→// to satisfy react-hooks/static-components lint rule
+   199→function LiteracyTooltip({
+   200→  active,
+   201→  payload,
+   202→  locale,
+   203→}: {
+   204→  active?: boolean
+   205→  payload?: Array<{ value: number; payload: { nameHi: string; nameEn: string; value: number; pct: number; color: string } }>
+   206→  locale: 'hi' | 'en'
+   207→}) {
+   208→  if (active && payload && payload.length) {
+   209→    const d = payload[0].payload
+   210→    const name = locale === 'hi' ? d.nameHi : d.nameEn
+   211→    return (
+   212→      <div className="bg-card border border-border rounded-md px-3 py-2 text-xs shadow-md">
+   213→        <div className="font-medium">{name}</div>
+   214→        <div className="text-muted-foreground">{d.value.toLocaleString('en-IN')} ({d.pct}%)</div>
+   215→      </div>
+   216→    )
+   217→  }
+   218→  return null
+   219→}
+   220→
+   221→export function EducationSection() {
+   222→  const { locale } = useI18n()
+   223→  const isHi = locale === 'hi'
+   224→
+   225→  const enrollmentData = ENROLLMENT.map(e => ({
+   226→    name: isHi ? e.class : e.classEn,
+   227→    ...e,
+   228→  }))
+   229→
+   230→  const literacyData = LITERACY_DATA.map(d => ({
+   231→    name: isHi ? d.nameHi : d.nameEn,
+   232→    ...d,
+   233→  }))
+   234→
+   235→  return (
+   236→    <section id="education" className="section-rail border-b border-border/60 py-16 md:py-20 relative">
+   237→      {/* Decorative backdrop */}
+   238→      <div className="absolute inset-0 section-backdrop-dots pointer-events-none" />
+   239→      <div className="container mx-auto px-4 relative">
+   240→        {/* Header */}
+   241→        <ScrollReveal delay={0.1}>
+   242→          <div className="mb-10">
+   243→            <Badge variant="outline" className="mb-2 gap-1.5">
+   244→              <GraduationCap className="h-3 w-3" />
+   245→              {isHi ? 'शिक्षा' : 'Education'}
+   246→            </Badge>
+   247→            <h2 className="text-2xl md:text-3xl font-bold section-heading border-bottom-glow inline-block">
+   248→              {isHi
+   249→                ? 'ग्राम चंद्रा — शिक्षा संस्थाएं एवं साक्षरता'
+   250→                : 'Gram Chandra — Education Institutions & Literacy'}
+   251→            </h2>
+   252→            <p className="text-sm text-gradient-tricolor mt-3 max-w-2xl">
+   253→              {isHi
+   254→                ? 'सर्व शिक्षा अभियान, मध्याह्न भोजन योजना, छात्रवृत्ति एवं नामांकन आँकड़े'
+   255→                : 'Sarva Shiksha Abhiyan, Mid-day Meal, Scholarships & Enrollment data'}
+   256→            </p>
+   257→            <div className="flex flex-wrap items-center gap-3 mt-3 text-[11px]">
+   258→              <a
+   259→                href="https://mdm.nic.in"
+   260→                target="_blank"
+   261→                rel="noopener noreferrer"
+   262→                className="text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+   263→              >
+   264→                <ExternalLink className="h-3 w-3" />
+   265→                mdm.nic.in
+   266→              </a>
+   267→              <a
+   268→                href="https://schooleducation.up.nic.in"
+   269→                target="_blank"
+   270→                rel="noopener noreferrer"
+   271→                className="text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+   272→              >
+   273→                <ExternalLink className="h-3 w-3" />
+   274→                schooleducation.up.nic.in
+   275→              </a>
+   276→            </div>
+   277→          </div>
+   278→        </ScrollReveal>
+   279→
+   280→        {/* Schools Overview — 3 stat-cards */}
+   281→        <ScrollReveal delay={0.15}>
+   282→          <div className="grid md:grid-cols-3 gap-6 mb-8 tricolor-frame rounded-lg p-1">
+   283→            {SCHOOLS.map(s => {
+   284→              const Icon = s.icon
+   285→              return (
+   286→                <Card
+   287→                  key={s.id}
+   288→                  className="border-border/70 indian-border-top hover-lift-large"
+   289→                >
+   290→                  <CardHeader className="pb-3">
+   291→                    <div className="flex items-start justify-between gap-2">
+   292→                      <CardTitle className="text-sm font-semibold">
+   293→                        {isHi ? s.nameHi : s.nameEn}
+   294→                      </CardTitle>
+   295→                      <div className="h-8 w-8 rounded-md grid place-items-center shrink-0 bg-primary/10 text-primary">
+   296→                        <Icon className="h-4 w-4" />
+   297→                      </div>
+   298→                    </div>
+   299→                  </CardHeader>
+   300→                  <CardContent>
+   301→                    <div className="text-3xl font-bold text-primary">{s.count}</div>
+   302→                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+   303→                      <MapPin className="h-3 w-3 shrink-0" />
+   304→                      <span>{isHi ? s.detailHi : s.detailEn}</span>
+   305→                    </div>
+   306→                  </CardContent>
+   307→                </Card>
+   308→              )
+   309→            })}
+   310→          </div>
+   311→        </ScrollReveal>
+   312→
+   313→        {/* Enrollment & Teachers Card — 2-column */}
+   314→        <ScrollReveal delay={0.2}>
+   315→          <div className="grid md:grid-cols-2 gap-6 mb-8">
+   316→            {/* Left: Enrollment BarChart */}
+   317→            <Card className="border-border/70">
+   318→              <CardHeader className="pb-3">
+   319→                <div className="flex items-start justify-between gap-2">
+   320→                  <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+   321→                    <BookOpen className="h-4 w-4 text-primary" />
+   322→                    {isHi ? 'कक्षावार नामांकन' : 'Enrollment by Class'}
+   323→                  </CardTitle>
+   324→                  <Badge variant="outline" className="text-[10px] gap-1 pulse-glow">
+   325→                    <Users className="h-3 w-3" />
+   326→                    {isHi ? 'कुल 103' : 'Total 103'}
+   327→                  </Badge>
+   328→                </div>
+   329→              </CardHeader>
+   330→              <CardContent>
+   331→                <ResponsiveContainer width="100%" height={250}>
+   332→                  <BarChart
+   333→                    data={enrollmentData}
+   334→                    layout="vertical"
+   335→                    margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+   336→                  >
+   337→                    <XAxis type="number" hide />
+   338→                    <YAxis
+   339→                      type="category"
+   340→                      dataKey="name"
+   341→                      tick={{ fontSize: 11 }}
+   342→                      width={60}
+   343→                      stroke="var(--muted-foreground)"
+   344→                    />
+   345→                    <Tooltip content={<EnrollmentTooltip locale={locale} />} />
+   346→                    <Bar
+   347→                      dataKey="total"
+   348→                      fill={SAFFRON}
+   349→                      radius={[0, 4, 4, 0]}
+   350→                      barSize={20}
+   351→                      label={({ x, width, y, value }) => {
+   352→                        if (![x, width, y, value].every(v => Number.isFinite(v))) return null
+   353→                        return (
+   354→                          <text
+   355→                            x={x + width + 6}
+   356→                            y={y + 13}
+   357→                            fontSize="11"
+   358→                            fontWeight="600"
+   359→                            fill="var(--foreground)"
+   360→                          >
+   361→                            {value}
+   362→                          </text>
+   363→                        )
+   364→                      }}
+   365→                    />
+   366→                  </BarChart>
+   367→                </ResponsiveContainer>
+   368→                <div className="flex flex-wrap gap-2 mt-3 justify-center">
+   369→                  {enrollmentData.map(e => (
+   370→                    <Badge
+   371→                      key={e.name}
+   372→                      variant="outline"
+   373→                      className="text-[10px] gap-1"
+   374→                      style={{ borderColor: SAFFRON, color: SAFFRON }}
+   375→                    >
+   376→                      {e.name}: {e.total}
+   377→                      <span className="text-muted-foreground">
+   378→                        ({e.boys}{isHi ? 'ले' : 'B'}/{e.girls}{isHi ? 'लि' : 'G'})
+   379→                      </span>
+   380→                    </Badge>
+   381→                  ))}
+   382→                </div>
+   383→              </CardContent>
+   384→            </Card>
+   385→
+   386→            {/* Right: Teacher Statistics Card */}
+   387→            <Card className="border-border/70">
+   388→              <CardHeader className="pb-3">
+   389→                <div className="flex items-start justify-between gap-2">
+   390→                  <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+   391→                    <Users className="h-4 w-4 text-primary" />
+   392→                    {isHi ? 'शिक्षक सांख्यिकी' : 'Teacher Statistics'}
+   393→                  </CardTitle>
+   394→                  <Badge variant="outline" className="text-[10px] gap-1">
+   395→                    <Award className="h-3 w-3" />
+   396→                    {isHi ? 'RTE अनुपात' : 'RTE Ratio'}
+   397→                  </Badge>
+   398→                </div>
+   399→              </CardHeader>
+   400→              <CardContent className="space-y-3">
+   401→                {/* Total Teachers + Student-Teacher Ratio */}
+   402→                <div className="grid grid-cols-2 gap-3">
+   403→                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+   404→                    <div className="text-xs text-muted-foreground mb-1">
+   405→                      {isHi ? 'कुल शिक्षक' : 'Total Teachers'}
+   406→                    </div>
+   407→                    <div className="text-2xl font-bold text-primary">{TEACHER_STATS.total}</div>
+   408→                    <div className="text-[10px] text-muted-foreground mt-1">
+   409→                      {TEACHER_STATS.male} {isHi ? 'पुरुष' : 'Male'} · {TEACHER_STATS.female} {isHi ? 'महिला' : 'Female'}
+   410→                    </div>
+   411→                  </div>
+   412→                  <div className="p-3 rounded-lg bg-secondary/50 border border-border/70">
+   413→                    <div className="text-xs text-muted-foreground mb-1">
+   414→                      {isHi ? 'छात्र-शिक्षक अनुपात' : 'Student-Teacher Ratio'}
+   415→                    </div>
+   416→                    <div className="text-2xl font-bold">{TEACHER_STATS.studentTeacherRatio}</div>
+   417→                    <div className="text-[10px] text-green-700 dark:text-green-400 mt-1 flex items-center gap-1">
+   418→                      <CheckCircle2 className="h-3 w-3" />
+   419→                      {isHi ? `RTE मान ${TEACHER_STATS.rteNorm} से बेहतर` : `Better than RTE ${TEACHER_STATS.rteNorm}`}
+   420→                    </div>
+   421→                  </div>
+   422→                </div>
+   423→
+   424→                {/* Qualification */}
+   425→                <div className="p-3 rounded-lg bg-accent/10 border border-accent/30">
+   426→                  <div className="flex items-center justify-between">
+   427→                    <div className="text-xs text-muted-foreground">
+   428→                      {isHi ? 'B.Ed/B.El.Ed योग्य' : 'Qualified (B.Ed/B.El.Ed)'}
+   429→                    </div>
+   430→                    <Badge className="text-[10px] gap-1" style={{ backgroundColor: GREEN, color: '#fff' }}>
+   431→                      <Award className="h-3 w-3" />
+   432→                      {TEACHER_STATS.qualifiedPct}%
+   433→                    </Badge>
+   434→                  </div>
+   435→                  <div className="text-lg font-semibold mt-1">
+   436→                    {TEACHER_STATS.qualified}{' '}
+   437→                    <span className="text-xs text-muted-foreground">({TEACHER_STATS.qualifiedPct}%)</span>
+   438→                  </div>
+   439→                </div>
+   440→
+   441→                {/* Cadre breakdown */}
+   442→                <div className="grid grid-cols-3 gap-2">
+   443→                  <div className="text-center p-2 rounded-md bg-secondary/50 border border-border/60">
+   444→                    <div className="text-[10px] text-muted-foreground">PGT</div>
+   445→                    <div className="text-lg font-bold">{TEACHER_STATS.pgt}</div>
+   446→                  </div>
+   447→                  <div className="text-center p-2 rounded-md bg-secondary/50 border border-border/60">
+   448→                    <div className="text-[10px] text-muted-foreground">TGT</div>
+   449→                    <div className="text-lg font-bold">{TEACHER_STATS.tgt}</div>
+   450→                  </div>
+   451→                  <div className="text-center p-2 rounded-md bg-secondary/50 border border-border/60">
+   452→                    <div className="text-[10px] text-muted-foreground">PRT</div>
+   453→                    <div className="text-lg font-bold">{TEACHER_STATS.prt}</div>
+   454→                  </div>
+   455→                </div>
+   456→
+   457→                <Separator className="my-1" />
+   458→                <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+   459→                  <Info className="h-3 w-3" />
+   460→                  {isHi ? 'स्रोत: उत्तर प्रदेश बेसिक शिक्षा विभाग' : 'Source: UP Basic Education Department'}
+   461→                </div>
+   462→              </CardContent>
+   463→            </Card>
+   464→          </div>
+   465→        </ScrollReveal>
+   466→
+   467→        {/* Mid-Day Meal Card */}
+   468→        <ScrollReveal delay={0.25}>
+   469→          <Card className="border-border/70 mb-8">
+   470→            <CardHeader className="pb-3">
+   471→              <div className="flex items-start justify-between gap-2 flex-wrap">
+   472→                <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+   473→                  <Utensils className="h-4 w-4 text-primary" />
+   474→                  {isHi ? 'मध्याह्न भोजन योजना' : 'Mid-Day Meal Scheme'}
+   475→                </CardTitle>
+   476→                <a
+   477→                  href="https://mdm.nic.in"
+   478→                  target="_blank"
+   479→                  rel="noopener noreferrer"
+   480→                  className="text-[11px] text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+   481→                >
+   482→                  <ExternalLink className="h-3 w-3" />
+   483→                  mdm.nic.in
+   484→                </a>
+   485→              </div>
+   486→            </CardHeader>
+   487→            <CardContent>
+   488→              {/* Stats grid */}
+   489→              <div className="grid grid-cols-3 gap-3 mb-4">
+   490→                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+   491→                  <div className="text-xs text-muted-foreground mb-1">
+   492→                    {isHi ? 'छात्र कवर्ड' : 'Students Covered'}
+   493→                  </div>
+   494→                  <div className="text-2xl font-bold text-primary">{MDM_STATS.studentsCovered}</div>
+   495→                  <div className="text-[10px] text-muted-foreground mt-0.5">
+   496→                    {MDM_STATS.coveragePct}% {isHi ? 'कवरेज' : 'coverage'}
+   497→                  </div>
+   498→                </div>
+   499→                <div className="p-3 rounded-lg bg-secondary/50 border border-border/70">
+   500→                  <div className="text-xs text-muted-foreground mb-1">
+   501→                    {isHi ? 'भोजन लागत/बालक' : 'Cooking Cost/Child'}
+   502→                  </div>
+   503→                  <div className="text-2xl font-bold">{MDM_STATS.cookingCost}</div>
+   504→                  <div className="text-[10px] text-muted-foreground mt-0.5">
+   505→                    {isHi ? 'प्राथमिक' : 'primary'}
+   506→                  </div>
+   507→                </div>
+   508→                <div className="p-3 rounded-lg bg-accent/10 border border-accent/30">
+   509→                  <div className="text-xs text-muted-foreground mb-1">
+   510→                    {isHi ? 'वार्षिक दिन' : 'Days Served/Year'}
+   511→                  </div>
+   512→                  <div className="text-2xl font-bold">{MDM_STATS.daysServed}</div>
+   513→                  <div className="text-[10px] text-muted-foreground mt-0.5">
+   514→                    {isHi ? 'दिन/वर्ष' : 'days/year'}
+   515→                  </div>
+   516→                </div>
+   517→              </div>
+   518→
+   519→              {/* Weekly menu */}
+   520→              <div className="rounded-lg border border-border/60 overflow-hidden">
+   521→                <div className="bg-secondary/50 px-3 py-2 text-xs font-semibold flex items-center gap-1.5">
+   522→                  <CalendarDays className="h-3.5 w-3.5 text-primary" />
+   523→                  {isHi ? 'साप्ताहिक मेनू नमूना' : 'Sample Weekly Menu'}
+   524→                </div>
+   525→                <div className="grid grid-cols-1 sm:grid-cols-5 gap-px bg-border/40">
+   526→                  {WEEKLY_MENU.map((m, idx) => (
+   527→                    <div key={idx} className="bg-card p-2.5">
+   528→                      <div className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+   529→                        {isHi ? m.dayHi : m.dayEn}
+   530→                      </div>
+   531→                      <div className="text-xs mt-1 leading-snug">
+   532→                        {isHi ? m.menuHi : m.menuEn}
+   533→                      </div>
+   534→                    </div>
+   535→                  ))}
+   536→                </div>
+   537→              </div>
+   538→
+   539→              <div className="mt-3 text-[10px] text-muted-foreground flex items-center gap-1.5">
+   540→                <Apple className="h-3 w-3" />
+   541→                {isHi
+   542→                  ? 'मेनू स्थानीय उपलब्धता के अनुसार परिवर्तनीय'
+   543→                  : 'Menu subject to local availability'}
+   544→              </div>
+   545→            </CardContent>
+   546→          </Card>
+   547→        </ScrollReveal>
+   548→
+   549→        {/* Literacy Rate Card */}
+   550→        <ScrollReveal delay={0.3}>
+   551→          <Card className="border-border/70 mb-8 tricolor-frame">
+   552→            <CardHeader className="pb-3">
+   553→              <div className="flex items-start justify-between gap-2">
+   554→                <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+   555→                  <BookCopy className="h-4 w-4 text-primary" />
+   556→                  {isHi ? 'साक्षरता दर विश्लेषण' : 'Literacy Rate Analysis'}
+   557→                </CardTitle>
+   558→                <Badge variant="outline" className="text-[10px] gap-1">
+   559→                  <TrendingUp className="h-3 w-3" />
+   560→                  {isHi ? 'जनगणना 2011' : 'Census 2011'}
+   561→                </Badge>
+   562→              </div>
+   563→            </CardHeader>
+   564→            <CardContent>
+   565→              <div className="grid md:grid-cols-2 gap-6 items-center">
+   566→                {/* Donut chart with centered overlay label */}
+   567→                <div className="relative">
+   568→                  <ResponsiveContainer width="100%" height={240}>
+   569→                    <PieChart>
+   570→                      <Pie
+   571→                        data={literacyData}
+   572→                        cx="50%"
+   573→                        cy="50%"
+   574→                        innerRadius={55}
+   575→                        outerRadius={85}
+   576→                        paddingAngle={2}
+   577→                        dataKey="value"
+   578→                        label={({ name, value }) => `${name}: ${value}`}
+   579→                        labelLine={true}
+   580→                      >
+   581→                        {literacyData.map((entry, index) => (
+   582→                          <Cell key={`cell-${index}`} fill={entry.color} />
+   583→                        ))}
+   584→                      </Pie>
+   585→                      <Tooltip content={<LiteracyTooltip locale={locale} />} />
+   586→                    </PieChart>
+   587→                  </ResponsiveContainer>
+   588→                  {/* Center label overlay */}
+   589→                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+   590→                    <div className="text-2xl font-bold text-primary leading-none pulse-glow rounded-md px-1.5">67.8%</div>
+   591→                    <div className="text-[10px] text-muted-foreground mt-1">
+   592→                      {isHi ? 'साक्षरता' : 'Literacy'}
+   593→                    </div>
+   594→                  </div>
+   595→                </div>
+   596→
+   597→                {/* Legend breakdown */}
+   598→                <div className="space-y-3">
+   599→                  {literacyData.map((d, idx) => (
+   600→                    <div
+   601→                      key={idx}
+   602→                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/40 border border-border/60"
+   603→                    >
+   604→                      <div className="flex items-center gap-2.5">
+   605→                        <span
+   606→                          className="h-3 w-3 rounded-sm shrink-0"
+   607→                          style={{ backgroundColor: d.color }}
+   608→                        />
+   609→                        <div>
+   610→                          <div className="text-xs font-medium">
+   611→                            {isHi ? d.nameHi : d.nameEn}
+   612→                          </div>
+   613→                          <div className="text-[10px] text-muted-foreground">
+   614→                            {isHi ? d.nameEn : d.nameHi}
+   615→                          </div>
+   616→                        </div>
+   617→                      </div>
+   618→                      <div className="text-right">
+   619→                        <div className="text-sm font-bold">{d.value.toLocaleString('en-IN')}</div>
+   620→                        <div className="text-[10px] text-muted-foreground">{d.pct}%</div>
+   621→                      </div>
+   622→                    </div>
+   623→                  ))}
+   624→                  <Separator />
+   625→                  <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+   626→                    <Info className="h-3 w-3" />
+   627→                    {isHi
+   628→                      ? 'कुल जनसंख्या: 1,247 · साक्षर: 687'
+   629→                      : 'Total population: 1,247 · Literates: 687'}
+   630→                  </div>
+   631→                </div>
+   632→              </div>
+   633→            </CardContent>
+   634→          </Card>
+   635→        </ScrollReveal>
+   636→
+   637→        {/* Scholarships Card */}
+   638→        <ScrollReveal delay={0.35}>
+   639→          <Card className="border-border/70 mb-8">
+   640→            <CardHeader className="pb-3">
+   641→              <div className="flex items-start justify-between gap-2 flex-wrap">
+   642→                <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+   643→                  <Award className="h-4 w-4 text-primary" />
+   644→                  {isHi ? 'छात्रवृत्ति योजनाएं' : 'Scholarship Schemes'}
+   645→                </CardTitle>
+   646→                <a
+   647→                  href="https://scholarship.up.nic.in"
+   648→                  target="_blank"
+   649→                  rel="noopener noreferrer"
+   650→                  className="text-[11px] text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+   651→                >
+   652→                  <ExternalLink className="h-3 w-3" />
+   653→                  scholarship.up.nic.in
+   654→                </a>
+   655→              </div>
+   656→            </CardHeader>
+   657→            <CardContent>
+   658→              <Table>
+   659→                <TableHeader>
+   660→                  <TableRow>
+   661→                    <TableHead className="text-xs">{isHi ? 'योजना' : 'Scheme'}</TableHead>
+   662→                    <TableHead className="text-xs text-right">{isHi ? 'राशि' : 'Amount'}</TableHead>
+   663→                    <TableHead className="text-xs">{isHi ? 'पात्रता' : 'Eligibility'}</TableHead>
+   664→                    <TableHead className="text-xs text-right">{isHi ? 'लाभार्थी' : 'Beneficiaries'}</TableHead>
+   665→                  </TableRow>
+   666→                </TableHeader>
+   667→                <TableBody>
+   668→                  {SCHOLARSHIPS.map((s, idx) => (
+   669→                    <TableRow key={idx}>
+   670→                      <TableCell className="text-xs font-medium align-top">
+   671→                        <div className="flex items-start gap-1.5">
+   672→                          <Award className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+   673→                          <div>
+   674→                            <div>{isHi ? s.schemeHi : s.schemeEn}</div>
+   675→                            <div className="text-[10px] text-muted-foreground">
+   676→                              {isHi ? s.schemeEn : s.schemeHi}
+   677→                            </div>
+   678→                          </div>
+   679→                        </div>
+   680→                      </TableCell>
+   681→                      <TableCell className="text-xs text-right font-semibold text-primary align-top whitespace-nowrap">
+   682→                        {isHi ? s.amountHi : s.amountEn}
+   683→                      </TableCell>
+   684→                      <TableCell className="text-xs text-muted-foreground align-top">
+   685→                        {isHi ? s.classHi : s.classEn}
+   686→                      </TableCell>
+   687→                      <TableCell className="text-xs text-right align-top">
+   688→                        <Badge variant="secondary" className="text-[10px]">
+   689→                          {s.beneficiaries}
+   690→                        </Badge>
+   691→                      </TableCell>
+   692→                    </TableRow>
+   693→                  ))}
+   694→                </TableBody>
+   695→              </Table>
+   696→              <div className="mt-3 text-[10px] text-muted-foreground flex items-center gap-1.5">
+   697→                <Library className="h-3 w-3" />
+   698→                {isHi
+   699→                  ? 'स्रोत: उत्तर प्रदेश छात्रवृत्ति एवं शिक्षा विभाग'
+   700→                  : 'Source: UP Scholarship & Education Department'}
+   701→              </div>
+   702→            </CardContent>
+   703→          </Card>
+   704→        </ScrollReveal>
+   705→
+   706→        {/* Footer note with section-divider */}
+   707→        <div className="section-divider">
+   708→          <span className="section-divider-dot" />
+   709→          <span className="section-divider-dot" />
+   710→          <span className="section-divider-dot" />
+   711→        </div>
+   712→        <div className="text-center text-xs text-muted-foreground mt-2 flex flex-col items-center gap-1.5">
+   713→          <p className="max-w-2xl">
+   714→            {isHi
+   715→              ? 'शिक्षा आंकड़े सर्व शिक्षा अभियान, उत्तर प्रदेश शिक्षा विभाग द्वारा प्रकाशित'
+   716→              : 'Education data published by Sarva Shiksha Abhiyan, UP Education Department'}
+   717→          </p>
+   718→          <a
+   719→            href="https://basiceducation.up.gov.in"
+   720→            target="_blank"
+   721→            rel="noopener noreferrer"
+   722→            className="text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+   723→          >
+   724→            <ExternalLink className="h-3 w-3" />
+   725→            basiceducation.up.gov.in
+   726→          </a>
+   727→        </div>
+   728→      </div>
+   729→    </section>
+   730→  )
+   731→}
+   732→

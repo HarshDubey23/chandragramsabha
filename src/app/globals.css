@@ -1,0 +1,1397 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-devanagari: var(--font-devanagari);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Warm cream background — rural paper feel */
+  --background: oklch(0.985 0.012 85);
+  --foreground: oklch(0.22 0.04 40);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.04 40);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.04 40);
+  /* Primary: deep saffron — Indian civic accent */
+  --primary: oklch(0.62 0.18 55);
+  --primary-foreground: oklch(0.99 0.01 85);
+  /* Secondary: warm sand */
+  --secondary: oklch(0.95 0.025 75);
+  --secondary-foreground: oklch(0.3 0.05 50);
+  --muted: oklch(0.94 0.02 80);
+  --muted-foreground: oklch(0.5 0.04 60);
+  /* Accent: agricultural green */
+  --accent: oklch(0.92 0.06 145);
+  --accent-foreground: oklch(0.28 0.08 150);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.88 0.03 70);
+  --input: oklch(0.92 0.025 75);
+  --ring: oklch(0.62 0.18 55);
+  /* Chart palette: saffron, green, terracotta, gold, indigo-dye-brown */
+  --chart-1: oklch(0.62 0.18 55);
+  --chart-2: oklch(0.6 0.14 145);
+  --chart-3: oklch(0.55 0.16 35);
+  --chart-4: oklch(0.78 0.15 85);
+  --chart-5: oklch(0.45 0.1 30);
+  --sidebar: oklch(0.985 0.012 85);
+  --sidebar-foreground: oklch(0.22 0.04 40);
+  --sidebar-primary: oklch(0.62 0.18 55);
+  --sidebar-primary-foreground: oklch(0.99 0.01 85);
+  --sidebar-accent: oklch(0.92 0.06 145);
+  --sidebar-accent-foreground: oklch(0.28 0.08 150);
+  --sidebar-border: oklch(0.88 0.03 70);
+  --sidebar-ring: oklch(0.62 0.18 55);
+}
+
+.dark {
+  --background: oklch(0.18 0.02 50);
+  --foreground: oklch(0.96 0.015 85);
+  --card: oklch(0.24 0.025 50);
+  --card-foreground: oklch(0.96 0.015 85);
+  --popover: oklch(0.24 0.025 50);
+  --popover-foreground: oklch(0.96 0.015 85);
+  --primary: oklch(0.72 0.17 60);
+  --primary-foreground: oklch(0.2 0.04 40);
+  --secondary: oklch(0.3 0.03 55);
+  --secondary-foreground: oklch(0.95 0.015 85);
+  --muted: oklch(0.3 0.025 55);
+  --muted-foreground: oklch(0.7 0.03 75);
+  --accent: oklch(0.38 0.08 150);
+  --accent-foreground: oklch(0.92 0.1 145);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.72 0.17 60);
+  --chart-1: oklch(0.72 0.17 60);
+  --chart-2: oklch(0.7 0.13 145);
+  --chart-3: oklch(0.65 0.15 35);
+  --chart-4: oklch(0.8 0.14 85);
+  --chart-5: oklch(0.55 0.1 30);
+  --sidebar: oklch(0.24 0.025 50);
+  --sidebar-foreground: oklch(0.96 0.015 85);
+  --sidebar-primary: oklch(0.72 0.17 60);
+  --sidebar-primary-foreground: oklch(0.2 0.04 40);
+  --sidebar-accent: oklch(0.38 0.08 150);
+  --sidebar-accent-foreground: oklch(0.92 0.1 145);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.72 0.17 60);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Apply Devanagari font automatically to Hindi text runs */
+  :lang(hi), [lang="hi"] {
+    font-family: var(--font-devanagari), var(--font-inter), system-ui, sans-serif;
+  }
+}
+
+/* Tricolor top accent bar (saffron / white / green) — subtle civic identity */
+.tricolor-bar {
+  background: linear-gradient(
+    to right,
+    oklch(0.72 0.17 60) 0%,
+    oklch(0.72 0.17 60) 33.33%,
+    oklch(0.98 0.01 85) 33.33%,
+    oklch(0.98 0.01 85) 66.66%,
+    oklch(0.55 0.14 150) 66.66%,
+    oklch(0.55 0.14 150) 100%
+  );
+}
+
+/* Hero pattern — subtle Indian geometric dot grid */
+.hero-pattern {
+  background-image:
+    radial-gradient(oklch(0.62 0.18 55 / 0.08) 1px, transparent 1px),
+    radial-gradient(oklch(0.55 0.14 150 / 0.06) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+/* Custom scrollbar for long lists / galleries */
+.custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.62 0.18 55 / 0.3);
+  border-radius: 4px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: oklch(0.62 0.18 55 / 0.5); }
+
+/* Section heading underline — hand-drawn feel */
+.section-heading::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  margin-top: 8px;
+  background: linear-gradient(to right, oklch(0.62 0.18 55), oklch(0.55 0.14 150));
+  border-radius: 2px;
+}
+
+/* Card hover lift — subtle elevation on interaction */
+.card-hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px oklch(0.22 0.04 40 / 0.12),
+              0 2px 8px -2px oklch(0.62 0.18 55 / 0.08);
+}
+
+/* Saffron gradient — warm Indian civic accent for section backgrounds */
+.gradient-saffron {
+  background: linear-gradient(
+    135deg,
+    oklch(0.72 0.17 60) 0%,
+    oklch(0.62 0.18 55) 50%,
+    oklch(0.58 0.18 50) 100%
+  );
+}
+
+/* Green gradient — agricultural accent for sections */
+.gradient-green {
+  background: linear-gradient(
+    135deg,
+    oklch(0.55 0.14 150) 0%,
+    oklch(0.48 0.12 145) 50%,
+    oklch(0.42 0.10 140) 100%
+  );
+}
+
+/* Government badge — small, muted, with slight border for official labels */
+.badge-gov {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: oklch(0.5 0.04 60);
+  background: oklch(0.96 0.02 80);
+  border: 1px solid oklch(0.88 0.03 70);
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* Section divider — decorative divider with dots pattern (chakra-like) */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 0;
+}
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, oklch(0.88 0.03 70), transparent);
+}
+.section-divider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(0.62 0.18 55 / 0.6);
+}
+
+/* Stat card — emphasis on numbers with large display */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: oklch(0.96 0.02 80);
+  border-radius: 8px;
+  border: 1px solid oklch(0.88 0.03 70 / 0.6);
+}
+.stat-card-number {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: oklch(0.62 0.18 55);
+}
+.stat-card-label {
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: oklch(0.5 0.04 60);
+}
+
+/* Pulse dot — animated indicator for "live" status */
+.pulse-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: oklch(0.55 0.14 150);
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: oklch(0.55 0.14 150 / 0.3);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* Shimmer loading — skeleton loading animation */
+.shimmer-loading {
+  position: relative;
+  overflow: hidden;
+  background: oklch(0.94 0.02 80);
+}
+.shimmer-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer-slide 2s ease-in-out infinite;
+}
+
+/* Tricolor strip animation — subtle gradient shift */
+@keyframes tricolor-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  80%, 100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Border glow effect for accent cards */
+.border-glow {
+  box-shadow: 0 0 0 1px oklch(0.55 0.14 150 / 0.3),
+              0 0 12px -4px oklch(0.55 0.14 150 / 0.2);
+  transition: box-shadow 0.3s ease;
+}
+.border-glow:hover {
+  box-shadow: 0 0 0 1px oklch(0.55 0.14 150 / 0.5),
+              0 0 20px -4px oklch(0.55 0.14 150 / 0.3);
+}
+
+/* Indian decorative pattern — top border for cards/sections */
+.indian-border-top {
+  border-top: 3px solid;
+  border-image: linear-gradient(to right, oklch(0.72 0.17 60), oklch(0.98 0.01 85), oklch(0.55 0.14 150)) 1;
+}
+
+/* Avatar initials styling */
+.avatar-initials {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 2px oklch(0.22 0.04 40 / 0.1);
+}
+
+/* ──────────── Round-4 enhancements ──────────── */
+
+/* Focus ring — accessible outline on keyboard focus for any element */
+.focus-ring:focus-visible {
+  outline: 2px solid oklch(0.62 0.18 55);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Accent border-left — used by FAQ & ward quote blocks */
+.accent-border-left {
+  border-left: 3px solid oklch(0.62 0.18 55);
+  padding-left: 12px;
+}
+.green-border-left {
+  border-left: 3px solid oklch(0.55 0.14 150);
+  padding-left: 12px;
+}
+
+/* Section anchor offset — when jumping to #anchor, the sticky header (h-16=64px) + tricolor strip
+   would otherwise cover the section title. This pseudo-element creates scroll-margin. */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
+/* Glow-on-hover for primary CTAs — soft saffron halo */
+.glow-saffron {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.glow-saffron:hover {
+  box-shadow: 0 0 0 4px oklch(0.62 0.18 55 / 0.12),
+              0 8px 24px -6px oklch(0.62 0.18 55 / 0.35);
+  transform: translateY(-1px);
+}
+
+/* Glow-on-hover for accent (green) CTAs */
+.glow-green {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.glow-green:hover {
+  box-shadow: 0 0 0 4px oklch(0.55 0.14 150 / 0.12),
+              0 8px 24px -6px oklch(0.55 0.14 150 / 0.35);
+  transform: translateY(-1px);
+}
+
+/* Subtle textured background — used by section heroes */
+.texture-dots {
+  background-image:
+    radial-gradient(oklch(0.62 0.18 55 / 0.05) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Glass effect — for floating elements over gradients */
+.glass {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid oklch(1 0 0 / 0.4);
+}
+.dark .glass {
+  background: oklch(0.24 0.025 50 / 0.6);
+  border-color: oklch(1 0 0 / 0.1);
+}
+
+/* Text gradient — saffron→green for emphasis headings */
+.text-gradient-tricolor {
+  background: linear-gradient(135deg, oklch(0.62 0.18 55) 0%, oklch(0.78 0.15 85) 50%, oklch(0.55 0.14 150) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Number badge — circular saffron badge for ward numbers, step counters, etc. */
+.number-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  background: linear-gradient(135deg, oklch(0.62 0.18 55), oklch(0.55 0.16 50));
+  color: oklch(0.99 0.01 85);
+  box-shadow: 0 2px 8px -2px oklch(0.62 0.18 55 / 0.4);
+}
+.number-badge-green {
+  background: linear-gradient(135deg, oklch(0.55 0.14 150), oklch(0.48 0.12 145));
+  box-shadow: 0 2px 8px -2px oklch(0.55 0.14 150 / 0.4);
+}
+
+/* Tag chip — small label for keywords / metadata */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 500;
+  background: oklch(0.96 0.02 80);
+  color: oklch(0.4 0.05 50);
+  border: 1px solid oklch(0.88 0.03 70);
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+.tag-chip:hover {
+  background: oklch(0.94 0.04 65);
+  color: oklch(0.3 0.06 55);
+}
+.dark .tag-chip {
+  background: oklch(0.3 0.03 55);
+  color: oklch(0.85 0.02 85);
+  border-color: oklch(1 0 0 / 0.12);
+}
+
+/* Soft pulse animation for live indicators */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+.soft-pulse {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+/* Slow rotate — for compass / chakra icons */
+@keyframes slow-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.slow-rotate {
+  animation: slow-rotate 30s linear infinite;
+}
+
+/* Floating animation — subtle vertical bob for hero icons */
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float-bob {
+  animation: float-bob 3s ease-in-out infinite;
+}
+
+/* Slide-in-from-bottom — utility used by motion alternatives */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-up {
+  animation: slide-up 0.6s ease-out both;
+}
+
+/* ──────────── Print styles for "Export Report" feature ──────────── */
+@media print {
+  /* Hide non-essential UI chrome when printing */
+  header, footer, .no-print, [aria-label*="Back to top"], button[aria-label*="डार्क मोड"],
+  button[aria-label*="Switch to dark mode"], button[aria-label*="Switch to light mode"] {
+    display: none !important;
+  }
+
+  /* Force light theme for printing */
+  :root {
+    --background: oklch(1 0 0) !important;
+    --foreground: oklch(0.1 0 0) !important;
+    --card: oklch(1 0 0) !important;
+    --card-foreground: oklch(0.1 0 0) !important;
+    --muted-foreground: oklch(0.3 0 0) !important;
+    --border: oklch(0.8 0 0) !important;
+  }
+  .dark { display: none !important; }
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+  }
+
+  /* Allow text wrap and prevent breaking inside cards */
+  main { padding: 0 !important; }
+  .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  section { page-break-inside: avoid; padding: 8px 0 !important; border: none !important; }
+
+  /* Show print-only header */
+  .print-only { display: block !important; }
+}
+.print-only { display: none; }
+
+/* Print header — visible only when printing */
+.print-header {
+  text-align: center;
+  padding: 12px 0;
+  border-bottom: 2px solid oklch(0.62 0.18 55);
+  margin-bottom: 16px;
+}
+.print-header h1 { font-size: 18pt; margin: 0; color: oklch(0.4 0.18 55); }
+.print-header p { font-size: 10pt; margin: 4px 0 0; color: oklch(0.4 0.04 50); }
+
+/* ──────────── Round-6 enhancements ──────────── */
+
+/* Calendar grid — for EventsCalendarSection */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.cal-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 6px;
+  background: oklch(0.96 0.02 80);
+  color: oklch(0.3 0.04 50);
+  position: relative;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.cal-cell:hover {
+  background: oklch(0.94 0.04 65);
+  transform: scale(1.05);
+}
+.cal-cell.cal-empty {
+  background: transparent;
+  cursor: default;
+}
+.cal-cell.cal-empty:hover {
+  background: transparent;
+  transform: none;
+}
+.cal-cell.cal-event {
+  background: oklch(0.94 0.06 55);
+  color: oklch(0.4 0.18 55);
+  font-weight: 700;
+}
+.cal-cell.cal-event::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: oklch(0.55 0.14 150);
+}
+.cal-cell.cal-today {
+  background: oklch(0.55 0.14 150);
+  color: oklch(0.99 0.01 85);
+  font-weight: 700;
+  box-shadow: 0 0 0 2px oklch(0.99 0.01 85), 0 0 0 4px oklch(0.55 0.14 150 / 0.4);
+}
+.cal-cell.cal-selected {
+  background: oklch(0.62 0.18 55);
+  color: oklch(0.99 0.01 85);
+  font-weight: 700;
+}
+.cal-header {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: oklch(0.5 0.04 60);
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* Star rating — for CitizenFeedback */
+.star-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.star-button:hover {
+  transform: scale(1.15);
+}
+.star-button:focus-visible {
+  outline: 2px solid oklch(0.62 0.18 55);
+  outline-offset: 2px;
+}
+.star-filled {
+  color: oklch(0.78 0.15 75);
+  fill: currentColor;
+}
+.star-empty {
+  color: oklch(0.85 0.02 80);
+}
+
+/* Section anchor offset — updated for larger sticky header */
+section[id] {
+  scroll-margin-top: 88px;
+}
+
+/* Pulse-glow — for live status indicators */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.55 0.14 150 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px oklch(0.55 0.14 150 / 0);
+  }
+}
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Card shimmer — for loading skeleton */
+.skeleton-card {
+  background: oklch(0.94 0.02 80);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmer-slide 1.5s ease-in-out infinite;
+}
+
+/* Hover lift large — for hero cards */
+.hover-lift-large {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift-large:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px oklch(0.22 0.04 40 / 0.15),
+              0 4px 12px -2px oklch(0.62 0.18 55 / 0.1);
+}
+
+/* Indian flag tricolor border — for prominent cards */
+.tricolor-frame {
+  border: 2px solid transparent;
+  border-image: linear-gradient(
+    to bottom,
+    oklch(0.72 0.17 60) 0%,
+    oklch(0.72 0.17 60) 33.33%,
+    oklch(0.98 0.01 85) 33.33%,
+    oklch(0.98 0.01 85) 66.66%,
+    oklch(0.55 0.14 150) 66.66%,
+    oklch(0.55 0.14 150) 100%
+  ) 1;
+}
+
+/* Underline grow — for nav links */
+.underline-grow {
+  position: relative;
+}
+.underline-grow::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: oklch(0.62 0.18 55);
+  transition: all 0.25s ease;
+  transform: translateX(-50%);
+}
+.underline-grow:hover::after,
+.underline-grow[data-active="true"]::after {
+  width: 80%;
+}
+
+/* Glow border-bottom — for active section */
+.border-bottom-glow {
+  border-bottom: 3px solid oklch(0.62 0.18 55);
+  box-shadow: 0 4px 12px -4px oklch(0.62 0.18 55 / 0.3);
+}
+
+/* Accessibility — skip to content link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: oklch(0.62 0.18 55);
+  color: oklch(0.99 0.01 85);
+  padding: 8px 16px;
+  border-radius: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 0;
+  outline: 2px solid oklch(0.4 0.18 55);
+  outline-offset: 2px;
+}
+
+/* Better tap targets on mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 36px;
+  }
+  .cal-cell {
+    font-size: 10px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Round 7 — Additional styling polish
+   ============================================================ */
+
+/* Hero subtle village landscape backdrop — SVG pattern of small triangles
+   representing village houses, very faint, only behind hero */
+.hero-village-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image:
+    /* Tiny house triangles */
+    linear-gradient(45deg, oklch(0.62 0.18 55) 25%, transparent 25%),
+    linear-gradient(-45deg, oklch(0.62 0.18 55) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, oklch(0.55 0.14 150) 75%),
+    linear-gradient(-45deg, transparent 75%, oklch(0.55 0.14 150) 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 0 30px, 30px -30px, -30px 0;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+}
+
+/* Subtle dot-grid texture — adds depth without distraction */
+.dot-grid {
+  background-image: radial-gradient(circle, oklch(0.5 0.02 60 / 0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Diagonal stripe pattern — for callout backgrounds */
+.diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    oklch(0.96 0.02 60) 0,
+    oklch(0.96 0.02 60) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+}
+
+/* Gradient text — emerald (for accents) */
+.text-gradient-emerald {
+  background: linear-gradient(135deg, oklch(0.55 0.14 150) 0%, oklch(0.45 0.12 165) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Saffron-to-amber gradient text */
+.text-gradient-amber {
+  background: linear-gradient(135deg, oklch(0.72 0.17 60) 0%, oklch(0.78 0.15 75) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Shiny sweep animation — for primary CTAs on hover */
+.shiny-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.shiny-sweep::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.25),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+.shiny-sweep:hover::before {
+  left: 130%;
+}
+
+/* Conic gradient ring — for circular progress / decorative badges */
+.conic-ring {
+  background: conic-gradient(
+    from 0deg,
+    oklch(0.72 0.17 60) 0deg,
+    oklch(0.98 0.01 85) 120deg,
+    oklch(0.55 0.14 150) 240deg,
+    oklch(0.72 0.17 60) 360deg
+  );
+}
+
+/* Card with saffron tint on top edge */
+.saffron-edge {
+  position: relative;
+}
+.saffron-edge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, oklch(0.72 0.17 60), oklch(0.78 0.15 75));
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.saffron-edge:hover::before {
+  opacity: 1;
+}
+
+/* Card with green tint on top edge */
+.green-edge {
+  position: relative;
+}
+.green-edge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, oklch(0.55 0.14 150), oklch(0.45 0.12 165));
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.green-edge:hover::before {
+  opacity: 1;
+}
+
+/* Stronger contrast for muted labels — addresses VLM accessibility concern */
+.label-strong {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: oklch(0.32 0.03 60);
+}
+.dark .label-strong {
+  color: oklch(0.78 0.02 60);
+}
+
+/* Number tabular for stats — keeps figures aligned */
+.tabular-nums-strong {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Animated underline accent for inline links */
+.link-accent {
+  position: relative;
+  color: oklch(0.55 0.16 50);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.link-accent::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.4);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.link-accent:hover {
+  color: oklch(0.42 0.18 50);
+}
+.link-accent:hover::after {
+  transform: scaleX(1);
+}
+
+/* Live status pulse dot — small green/orange dot */
+@keyframes status-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+.status-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: oklch(0.55 0.14 150);
+}
+.status-dot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: status-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.status-dot.amber { background: oklch(0.72 0.17 60); }
+.status-dot.red { background: oklch(0.55 0.18 25); }
+
+/* Hover glow for icon containers */
+.icon-glow-hover {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.icon-glow-hover:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px oklch(0.62 0.18 55 / 0.35);
+}
+
+/* Section side-rail decoration — small tricolor vertical bar on section start */
+.section-rail {
+  position: relative;
+  padding-left: 1rem;
+}
+.section-rail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to bottom,
+    oklch(0.72 0.17 60) 0%,
+    oklch(0.72 0.17 60) 33.33%,
+    oklch(0.98 0.01 85) 33.33%,
+    oklch(0.98 0.01 85) 66.66%,
+    oklch(0.55 0.14 150) 66.66%,
+    oklch(0.55 0.14 150) 100%
+  );
+}
+
+/* Bouncy entrance — for hero CTAs */
+@keyframes bouncy-in {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.bouncy-in {
+  animation: bouncy-in 0.6s ease-out both;
+}
+
+/* Subtle floating — for decorative elements */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.gentle-float {
+  animation: gentle-float 4s ease-in-out infinite;
+}
+
+/* Tricolor underline accent */
+.tricolor-underline {
+  background-image: linear-gradient(
+    to right,
+    oklch(0.72 0.17 60) 0%,
+    oklch(0.72 0.17 60) 33.33%,
+    oklch(0.98 0.01 85) 33.33%,
+    oklch(0.98 0.01 85) 66.66%,
+    oklch(0.55 0.14 150) 66.66%,
+    oklch(0.55 0.14 150) 100%
+  );
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  padding-bottom: 4px;
+}
+
+/* Better focus ring — for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid oklch(0.62 0.18 55);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbar styling — for sidebar / overflow boxes */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.62 0.18 55 / 0.3) transparent;
+}
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.62 0.18 55 / 0.3);
+  border-radius: 9999px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.62 0.18 55 / 0.5);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Round 8 — additional polish utilities
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Glass card — frosted background for premium feel */
+.glass-card {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid oklch(1 0 0 / 0.2);
+  box-shadow:
+    0 4px 24px -8px oklch(0 0 0 / 0.12),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.6);
+}
+.dark .glass-card {
+  background: oklch(0.18 0.02 60 / 0.6);
+  border-color: oklch(1 0 0 / 0.08);
+  box-shadow:
+    0 4px 24px -8px oklch(0 0 0 / 0.5),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+}
+
+/* Soft glow on hover — for hero stat cards */
+.soft-glow-hover {
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.soft-glow-hover:hover {
+  box-shadow:
+    0 0 0 1px oklch(0.62 0.18 55 / 0.3),
+    0 8px 32px -12px oklch(0.62 0.18 55 / 0.4);
+  transform: translateY(-2px);
+}
+
+/* Year marker ring — for the timeline year circle */
+.year-marker-ring {
+  position: relative;
+  isolation: isolate;
+}
+.year-marker-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    oklch(0.62 0.18 55) 0deg,
+    oklch(0.18 0.18 144) 120deg,
+    oklch(0.45 0.14 0) 240deg,
+    oklch(0.62 0.18 55) 360deg
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.year-marker-ring:hover::before,
+.group:hover .year-marker-ring::before {
+  opacity: 0.35;
+}
+
+/* Subtle paper-like texture — for "official document" feel sections */
+.paper-texture {
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      oklch(0 0 0 / 0.02) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      oklch(0 0 0 / 0.015) 1px,
+      transparent 1px
+    );
+  background-size: 24px 24px, 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+.dark .paper-texture {
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      oklch(1 0 0 / 0.025) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      oklch(1 0 0 / 0.015) 1px,
+      transparent 1px
+    );
+}
+
+/* Number ticker animation — for stat-card numbers */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.count-up-animate {
+  animation: count-up 0.5s ease-out;
+}
+
+/* Pill button — for compact horizontal lists (used by ward pill list) */
+.pill-button {
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.pill-button:hover {
+  transform: translateY(-1px);
+}
+.pill-button[aria-pressed='true'] {
+  background: oklch(0.62 0.18 55 / 0.12);
+  border-color: oklch(0.62 0.18 55 / 0.5);
+  color: oklch(0.45 0.16 55);
+}
+.dark .pill-button[aria-pressed='true'] {
+  background: oklch(0.62 0.18 55 / 0.2);
+  color: oklch(0.85 0.12 55);
+}
+
+/* Tooltip arrow — for floating tooltips */
+.tooltip-arrow {
+  position: relative;
+}
+.tooltip-arrow::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  border-right: 1px solid oklch(0 0 0 / 0.1);
+  border-bottom: 1px solid oklch(0 0 0 / 0.1);
+}
+
+/* Image card zoom — for photo gallery */
+.image-zoom {
+  transition: transform 0.5s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.image-zoom:hover {
+  transform: scale(1.06);
+}
+
+/* Hidden-scrollbar — for horizontal scroll lists where scrollbar would clutter */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Print-friendly improvements — for ExportReport */
+@media print {
+  .print-only {
+    display: block !important;
+  }
+  section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .glass-card,
+  .soft-glow-hover:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+/* Scheme-progress — color-customisable progress bar (Round 9-c).
+   Pass `--scheme-color` via inline style on the shadcn Progress component
+   (which has class "scheme-progress" + data-slot="progress"). */
+.scheme-progress[data-slot="progress"] {
+  background-color: color-mix(in oklch, var(--scheme-color, oklch(0.62 0.18 55)) 22%, transparent) !important;
+}
+.scheme-progress[data-slot="progress"] [data-slot="progress-indicator"] {
+  background-color: var(--scheme-color, oklch(0.62 0.18 55)) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Round 10-c — styling polish utilities
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Animated gradient border — tricolor (saffron → white → green) cycling over 4s */
+@keyframes gradient-border-shift {
+  0%   { border-color: oklch(0.72 0.17 60); }   /* saffron */
+  33%  { border-color: oklch(0.98 0.01 85); }   /* white */
+  66%  { border-color: oklch(0.55 0.14 150); }  /* green */
+  100% { border-color: oklch(0.72 0.17 60); }   /* saffron */
+}
+.gradient-border-animate {
+  border-width: 2px;
+  border-style: solid;
+  border-color: oklch(0.72 0.17 60);
+  animation: gradient-border-shift 4s ease-in-out infinite;
+}
+
+/* Hero floating particles — tiny dots that float upward slowly
+   Using CSS custom properties (--particle-delay, --particle-x) for variation */
+@keyframes hero-particle-float {
+  0% {
+    opacity: 0.03;
+    transform: translateY(0) translateX(var(--particle-drift, 0px));
+  }
+  50% {
+    opacity: 0.03;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) translateX(calc(var(--particle-drift, 0px) * 0.5));
+  }
+}
+.hero-particle {
+  position: absolute;
+  width: var(--particle-size, 2px);
+  height: var(--particle-size, 2px);
+  border-radius: 50%;
+  background: oklch(0.62 0.18 55 / 0.5);
+  opacity: 0;
+  animation: hero-particle-float var(--particle-duration, 10s) ease-out infinite;
+  animation-delay: var(--particle-delay, 0s);
+  left: var(--particle-x, 50%);
+  bottom: var(--particle-y, 20%);
+  pointer-events: none;
+}
+.hero-particle-1 { --particle-size: 2px; --particle-duration: 8s; --particle-delay: 0s; --particle-x: 10%; --particle-y: 30%; --particle-drift: 8px; }
+.hero-particle-2 { --particle-size: 3px; --particle-duration: 10s; --particle-delay: 2s; --particle-x: 30%; --particle-y: 50%; --particle-drift: -6px; }
+.hero-particle-3 { --particle-size: 2px; --particle-duration: 12s; --particle-delay: 4s; --particle-x: 55%; --particle-y: 40%; --particle-drift: 10px; }
+.hero-particle-4 { --particle-size: 2px; --particle-duration: 9s; --particle-delay: 1.5s; --particle-x: 75%; --particle-y: 25%; --particle-drift: -4px; }
+.hero-particle-5 { --particle-size: 3px; --particle-duration: 11s; --particle-delay: 3s; --particle-x: 90%; --particle-y: 60%; --particle-drift: 6px; }
+.hero-particle-6 { --particle-size: 2px; --particle-duration: 8.5s; --particle-delay: 5s; --particle-x: 45%; --particle-y: 15%; --particle-drift: -8px; }
+
+/* Section backdrop dots — subtle dot-grid background texture at 3% opacity */
+.section-backdrop-dots {
+  background-image: radial-gradient(circle, oklch(0.5 0.02 60 / 0.03) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Stat card shimmer — brief highlight sweep on load */
+@keyframes stat-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.stat-card-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    oklch(1 0 0 / 0.08) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: stat-shimmer 1.2s ease-out 0.3s 1 both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Round 11-b — Admin notification + ComplaintManager polish
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Notification dropdown slide-down animation */
+@keyframes notification-slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.notification-dropdown-slide {
+  animation: notification-slide-down 0.25s ease-out both;
+}
+
+/* Notification item hover-lift — subtle hover effect on notification rows */
+.notification-item-hover-lift {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.notification-item-hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Admin tab hover effect — subtle glow on tab buttons */
+.admin-tab-hover {
+  transition: all 0.2s ease;
+}
+.admin-tab-hover:hover {
+  box-shadow: 0 0 0 1px oklch(0.62 0.18 55 / 0.3),
+              0 2px 8px -4px oklch(0.62 0.18 55 / 0.15);
+}
+
+/* Conic-ring badge — for notification bell badge */
+.conic-ring-badge {
+  background: conic-gradient(
+    from 0deg,
+    oklch(0.72 0.17 60) 0deg,
+    oklch(0.98 0.01 85) 120deg,
+    oklch(0.55 0.14 150) 240deg,
+    oklch(0.72 0.17 60) 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  border-radius: 9999px;
+  padding: 1px;
+}
+.conic-ring-badge > span {
+  background: oklch(0.62 0.18 55);
+  border-radius: inherit;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Round 11-c — Styling Polish: New utility classes
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Emergency pulse — faster red pulse animation for critical emergency contacts */
+@keyframes emergency-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; box-shadow: 0 0 8px 2px oklch(0.55 0.22 25 / 0.5); }
+}
+.emergency-pulse {
+  animation: emergency-pulse 1s ease-in-out infinite;
+}
+
+/* Category badge glow — glow effect on category badges/stat cards in grievance section */
+@keyframes category-badge-glow-keyframes {
+  0%, 100% { box-shadow: 0 0 4px 0px oklch(0.72 0.17 60 / 0.3); }
+  50% { box-shadow: 0 0 10px 3px oklch(0.72 0.17 60 / 0.5); }
+}
+.category-badge-glow {
+  animation: category-badge-glow-keyframes 2.5s ease-in-out infinite;
+}
+
