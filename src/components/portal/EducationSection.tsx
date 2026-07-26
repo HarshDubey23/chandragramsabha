@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { useI18n } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -240,15 +241,48 @@ function LiteracyTooltip({
 export function EducationSection() {
   const { locale } = useI18n()
   const isHi = locale === 'hi'
+  const [eduData, setEduData] = useState<{
+    primary_school?: { teachers?: number; students?: number }
+    literacy?: { male?: number; female?: number; overall?: number }
+    enrollment?: { boys?: number; girls?: number; total?: number }
+    mid_day_meal?: { students_served?: number }
+    scholarships?: { sc_st?: number; obc?: number; general?: number; total?: number }
+  } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/content/education').then(r => r.ok ? r.json() : null).then(d => d?.data && setEduData(d.data)).catch(() => {})
+  }, [])
+
+  // Dynamic teacher stats — override hardcoded with content API data if available
+  const teacherStats = eduData?.primary_school?.teachers ? {
+    ...TEACHER_STATS,
+    total: eduData.primary_school.teachers,
+    studentTeacherRatio: eduData.primary_school.students && eduData.primary_school.teachers
+      ? `${Math.round(eduData.primary_school.students / eduData.primary_school.teachers)}:1`
+      : TEACHER_STATS.studentTeacherRatio,
+  } : TEACHER_STATS
+
+  // Dynamic MDM stats
+  const mdmStats = eduData?.mid_day_meal?.students_served ? {
+    ...MDM_STATS,
+    studentsCovered: eduData.mid_day_meal.students_served,
+  } : MDM_STATS
+
+  // Dynamic literacy data — override with content API values
+  const literacyData = (LITERACY_DATA).map(d => {
+    if (eduData?.literacy) {
+      if (d.nameEn === 'Literate Male' && eduData.literacy.male) return { ...d, pct: eduData.literacy.male }
+      if (d.nameEn === 'Literate Female' && eduData.literacy.female) return { ...d, pct: eduData.literacy.female }
+    }
+    return d
+  }).map(d => ({
+    name: isHi ? d.nameHi : d.nameEn,
+    ...d,
+  }))
 
   const enrollmentData = ENROLLMENT.map(e => ({
     name: isHi ? e.class : e.classEn,
     ...e,
-  }))
-
-  const literacyData = LITERACY_DATA.map(d => ({
-    name: isHi ? d.nameHi : d.nameEn,
-    ...d,
   }))
 
   return (
@@ -468,19 +502,19 @@ export function EducationSection() {
                     <div className="text-xs text-muted-foreground mb-1">
                       {isHi ? 'कुल शिक्षक' : 'Total Teachers'}
                     </div>
-                    <div className="text-2xl font-bold text-primary">{TEACHER_STATS.total}</div>
+                    <div className="text-2xl font-bold text-primary">{teacherStats.total}</div>
                     <div className="text-[10px] text-muted-foreground mt-1">
-                      {TEACHER_STATS.male} {isHi ? 'पुरुष' : 'Male'} · {TEACHER_STATS.female} {isHi ? 'महिला' : 'Female'}
+                      {teacherStats.male} {isHi ? 'पुरुष' : 'Male'} · {teacherStats.female} {isHi ? 'महिला' : 'Female'}
                     </div>
                   </div>
                   <div className="p-3 rounded-lg bg-secondary/50 border border-border/70">
                     <div className="text-xs text-muted-foreground mb-1">
                       {isHi ? 'छात्र-शिक्षक अनुपात' : 'Student-Teacher Ratio'}
                     </div>
-                    <div className="text-2xl font-bold">{TEACHER_STATS.studentTeacherRatio}</div>
+                    <div className="text-2xl font-bold">{teacherStats.studentTeacherRatio}</div>
                     <div className="text-[10px] text-green-700 dark:text-green-400 mt-1 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      {isHi ? `RTE मान ${TEACHER_STATS.rteNorm} से बेहतर` : `Better than RTE ${TEACHER_STATS.rteNorm}`}
+                      {isHi ? `RTE मान ${teacherStats.rteNorm} से बेहतर` : `Better than RTE ${teacherStats.rteNorm}`}
                     </div>
                   </div>
                 </div>
@@ -555,7 +589,7 @@ export function EducationSection() {
                   <div className="text-xs text-muted-foreground mb-1">
                     {isHi ? 'छात्र कवर्ड' : 'Students Covered'}
                   </div>
-                  <div className="text-2xl font-bold text-primary">{MDM_STATS.studentsCovered}</div>
+                  <div className="text-2xl font-bold text-primary">{mdmStats.studentsCovered}</div>
                   <div className="text-[10px] text-muted-foreground mt-0.5">
                     {MDM_STATS.coveragePct}% {isHi ? 'कवरेज' : 'coverage'}
                   </div>

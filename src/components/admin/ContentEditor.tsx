@@ -1,15 +1,16 @@
 'use client'
-// Content Editor — admin can edit dynamic portal data (village stats, infrastructure,
-// education, health, schemes, SHG, emergency contacts) without code changes.
-// Master doc §4.3. Each section has a structured JSON editor with save.
+// Content Editor — admin can edit dynamic portal data with structured form or raw JSON.
+// Master doc §4.3. Form mode provides labeled inputs; JSON mode for advanced users.
 import { useEffect, useState, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n'
 import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Database, Save, Loader2, RefreshCw, Edit3, Check, X, AlertCircle } from 'lucide-react'
+import { Database, Save, Loader2, Edit3, Check, X, AlertCircle, Code, FormInput } from 'lucide-react'
 
 interface SectionMeta {
   key: string
@@ -17,28 +18,134 @@ interface SectionMeta {
   en: string
   icon: string
   description: string
+  // Field definitions for structured form mode
+  fields?: FieldDef[]
+}
+
+interface FieldDef {
+  path: string // dot-notation path e.g. "population", "roads.pucca_km"
+  hi: string
+  en: string
+  type: 'number' | 'text'
+  unit?: string
 }
 
 const SECTIONS: SectionMeta[] = [
-  { key: 'village_stats', hi: 'ग्राम आँकड़े', en: 'Village Stats', icon: 'users', description: 'Population, households, literacy, workers' },
-  { key: 'infrastructure', hi: 'आधारभूत संरचना', en: 'Infrastructure', icon: 'building', description: 'Roads, water, power, sanitation' },
-  { key: 'education', hi: 'शिक्षा', en: 'Education', icon: 'graduation', description: 'School, anganwadi, enrollment, literacy' },
-  { key: 'health', hi: 'स्वास्थ्य', en: 'Health', icon: 'heart', description: 'Sub-center, PHC, immunization, maternal care' },
-  { key: 'schemes_coverage', hi: 'योजना कवरेज', en: 'Scheme Coverage', icon: 'briefcase', description: 'MGNREGA, PMAY-G, JJM, pension, SBM-G' },
+  { key: 'village_stats', hi: 'ग्राम आँकड़े', en: 'Village Stats', icon: 'users', description: 'Population, households, literacy, workers',
+    fields: [
+      { path: 'population', hi: 'जनसंख्या', en: 'Population', type: 'number' },
+      { path: 'households', hi: 'घर', en: 'Households', type: 'number' },
+      { path: 'wards', hi: 'वार्ड', en: 'Wards', type: 'number' },
+      { path: 'area_ha', hi: 'क्षेत्रफल (हेक्टेयर)', en: 'Area (ha)', type: 'number' },
+      { path: 'literacy_rate', hi: 'साक्षरता दर (%)', en: 'Literacy Rate (%)', type: 'number' },
+      { path: 'sex_ratio', hi: 'लिंग अनुपात', en: 'Sex Ratio', type: 'number' },
+      { path: 'population_male', hi: 'पुरुष जनसंख्या', en: 'Male Population', type: 'number' },
+      { path: 'population_female', hi: 'महिला जनसंख्या', en: 'Female Population', type: 'number' },
+      { path: 'main_workers', hi: 'मुख्य श्रमिक', en: 'Main Workers', type: 'number' },
+      { path: 'marginal_workers', hi: 'सीमांत श्रमिक', en: 'Marginal Workers', type: 'number' },
+    ],
+  },
+  { key: 'infrastructure', hi: 'आधारभूत संरचना', en: 'Infrastructure', icon: 'building', description: 'Roads, water, power, sanitation',
+    fields: [
+      { path: 'roads.pucca_km', hi: 'पक्की सड़क (किमी)', en: 'Pucca Road (km)', type: 'number' },
+      { path: 'roads.kuccha_km', hi: 'कच्ची सड़क (किमी)', en: 'Kuccha Road (km)', type: 'number' },
+      { path: 'roads.drains_km', hi: 'नाली (किमी)', en: 'Drains (km)', type: 'number' },
+      { path: 'water.handpumps', hi: 'हैंडपंप', en: 'Handpumps', type: 'number' },
+      { path: 'water.tap_connections', hi: 'नल कनेक्शन', en: 'Tap Connections', type: 'number' },
+      { path: 'water.jjm_coverage_pct', hi: 'JJM कवरेज (%)', en: 'JJM Coverage (%)', type: 'number' },
+      { path: 'power.household_electrified', hi: 'विद्युत युक्त घर', en: 'Electrified Homes', type: 'number' },
+      { path: 'power.solar_panels', hi: 'सौर पैनल', en: 'Solar Panels', type: 'number' },
+      { path: 'power.street_lights', hi: 'स्ट्रीट लाइट', en: 'Street Lights', type: 'number' },
+      { path: 'sanitation.ihhl_built', hi: 'शौचालय निर्मित', en: 'Toilets Built', type: 'number' },
+      { path: 'sanitation.sbm_coverage_pct', hi: 'SBM कवरेज (%)', en: 'SBM Coverage (%)', type: 'number' },
+    ],
+  },
+  { key: 'education', hi: 'शिक्षा', en: 'Education', icon: 'graduation', description: 'School, anganwadi, enrollment, literacy',
+    fields: [
+      { path: 'primary_school.teachers', hi: 'शिक्षक', en: 'Teachers', type: 'number' },
+      { path: 'primary_school.students', hi: 'छात्र', en: 'Students', type: 'number' },
+      { path: 'primary_school.rooms', hi: 'कक्षाएँ', en: 'Rooms', type: 'number' },
+      { path: 'anganwadi.centers', hi: 'आंगनवाड़ी केंद्र', en: 'Anganwadi Centers', type: 'number' },
+      { path: 'anganwadi.children_enrolled', hi: 'बच्चे नामांकित', en: 'Children Enrolled', type: 'number' },
+      { path: 'literacy.male', hi: 'पुरुष साक्षरता (%)', en: 'Male Literacy (%)', type: 'number' },
+      { path: 'literacy.female', hi: 'महिला साक्षरता (%)', en: 'Female Literacy (%)', type: 'number' },
+      { path: 'literacy.overall', hi: 'कुल साक्षरता (%)', en: 'Overall Literacy (%)', type: 'number' },
+      { path: 'mid_day_meal.students_served', hi: 'MDM छात्र', en: 'MDM Students', type: 'number' },
+      { path: 'scholarships.total', hi: 'कुल छात्रवृत्ति', en: 'Total Scholarships', type: 'number' },
+    ],
+  },
+  { key: 'health', hi: 'स्वास्थ्य', en: 'Health', icon: 'heart', description: 'Sub-center, PHC, immunization, maternal',
+    fields: [
+      { path: 'anganwadi_centers', hi: 'आंगनवाड़ी केंद्र', en: 'Anganwadi Centers', type: 'number' },
+      { path: 'immunization_coverage_pct', hi: 'टीकाकरण कवरेज (%)', en: 'Immunization (%)', type: 'number' },
+      { path: 'health_workers.anm', hi: 'ANM', en: 'ANM', type: 'number' },
+      { path: 'health_workers.asha', hi: 'ASHA', en: 'ASHA', type: 'number' },
+      { path: 'health_workers.anganwadi_workers', hi: 'आंगनवाड़ी कार्यकर्ता', en: 'Anganwadi Workers', type: 'number' },
+      { path: 'sanitation.ihhl_built', hi: 'शौचालय निर्मित', en: 'Toilets Built', type: 'number' },
+      { path: 'sanitation.coverage_pct', hi: 'SBM कवरेज (%)', en: 'SBM Coverage (%)', type: 'number' },
+      { path: 'maternal_care.anc_registered', hi: 'ANC पंजीकृत', en: 'ANC Registered', type: 'number' },
+      { path: 'maternal_care.institutional_deliveries', hi: 'संस्थागत प्रसव', en: 'Institutional Deliveries', type: 'number' },
+    ],
+  },
+  { key: 'schemes_coverage', hi: 'योजना कवरेज', en: 'Scheme Coverage', icon: 'briefcase', description: 'MGNREGA, PMAY-G, JJM, pension, SBM-G',
+    fields: [
+      { path: 'mgnrega.active_jobcards', hi: 'मनरेगा सक्रिय जॉब कार्ड', en: 'MGNREGA Active Cards', type: 'number' },
+      { path: 'mgnrega.total_jobcards', hi: 'मनरेगा कुल जॉब कार्ड', en: 'MGNREGA Total Cards', type: 'number' },
+      { path: 'mgnrega.coverage_pct', hi: 'मनरेगा कवरेज (%)', en: 'MGNREGA Coverage (%)', type: 'number' },
+      { path: 'mgnrega.persondays', hi: 'मानव-दिन', en: 'Persondays', type: 'number' },
+      { path: 'mgnrega.expenditure_rs', hi: 'मनरेगा व्यय (₹)', en: 'MGNREGA Expenditure (₹)', type: 'number' },
+      { path: 'pmay_g.completed', hi: 'PMAY पूर्ण', en: 'PMAY Completed', type: 'number' },
+      { path: 'pmay_g.total', hi: 'PMAY कुल', en: 'PMAY Total', type: 'number' },
+      { path: 'pmay_g.coverage_pct', hi: 'PMAY कवरेज (%)', en: 'PMAY Coverage (%)', type: 'number' },
+      { path: 'jjm.tap_connections', hi: 'JJM नल कनेक्शन', en: 'JJM Tap Connections', type: 'number' },
+      { path: 'jjm.coverage_pct', hi: 'JJM कवरेज (%)', en: 'JJM Coverage (%)', type: 'number' },
+      { path: 'pension.old_age', hi: 'वृद्धा पेंशन', en: 'Old Age Pension', type: 'number' },
+      { path: 'pension.widow', hi: 'विधवा पेंशन', en: 'Widow Pension', type: 'number' },
+      { path: 'pension.divyang', hi: 'दिव्यांग पेंशन', en: 'Divyang Pension', type: 'number' },
+    ],
+  },
   { key: 'shg_directory', hi: 'स्व-सहायता समूह', en: 'SHG Directory', icon: 'users', description: 'Self-help groups, members, savings' },
   { key: 'emergency_contacts', hi: 'आपातकालीन संपर्क', en: 'Emergency Contacts', icon: 'phone', description: 'Police, ambulance, PHC, utilities' },
 ]
+
+// Get value at dot-notation path
+function getPath(obj: unknown, path: string): unknown {
+  const parts = path.split('.')
+  let cur: unknown = obj
+  for (const p of parts) {
+    if (cur && typeof cur === 'object' && p in cur) {
+      cur = (cur as Record<string, unknown>)[p]
+    } else {
+      return ''
+    }
+  }
+  return cur
+}
+
+// Set value at dot-notation path (immutable)
+function setPath(obj: Record<string, unknown>, path: string, val: unknown): Record<string, unknown> {
+  const parts = path.split('.')
+  const root = JSON.parse(JSON.stringify(obj)) as Record<string, unknown>
+  let cur: Record<string, unknown> = root
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!cur[parts[i]] || typeof cur[parts[i]] !== 'object') cur[parts[i]] = {}
+    cur = cur[parts[i]] as Record<string, unknown>
+  }
+  cur[parts[parts.length - 1]] = val
+  return root
+}
 
 export function ContentEditor() {
   const { locale } = useI18n()
   const isHi = locale === 'hi'
   const [activeKey, setActiveKey] = useState<string | null>(null)
-  const [data, setData] = useState<unknown>(null)
+  const [data, setData] = useState<Record<string, unknown>>({})
   const [editText, setEditText] = useState('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [mode, setMode] = useState<'form' | 'json'>('form')
 
   const load = useCallback(async (key: string) => {
     setLoading(true)
@@ -53,8 +160,9 @@ export function ContentEditor() {
         throw new Error('not_found')
       }
       const d = await r.json()
-      setData(d.data)
-      setEditText(JSON.stringify(d.data, null, 2))
+      const obj = (d.data || {}) as Record<string, unknown>
+      setData(obj)
+      setEditText(JSON.stringify(obj, null, 2))
       setUpdatedAt(d.updatedAt || null)
     } catch {
       setData({})
@@ -68,12 +176,25 @@ export function ContentEditor() {
     if (activeKey) load(activeKey)
   }, [activeKey, load])
 
+  // Sync editText when data changes via form mode
+  useEffect(() => {
+    if (mode === 'form' && dirty) {
+      setEditText(JSON.stringify(data, null, 2))
+    }
+  }, [data, mode, dirty])
+
+  const handleFieldChange = (path: string, val: string) => {
+    const numVal = val === '' ? 0 : Number(val)
+    const newData = setPath(data, path, isNaN(numVal) ? val : numVal)
+    setData(newData)
+    setDirty(true)
+  }
+
   const handleSave = async () => {
     if (!activeKey) return
-    // Validate JSON
     let parsed: unknown
     try {
-      parsed = JSON.parse(editText)
+      parsed = mode === 'json' ? JSON.parse(editText) : data
     } catch (e) {
       toast.error(isHi ? 'अमान्य JSON' : 'Invalid JSON', { description: (e as Error).message })
       return
@@ -89,8 +210,8 @@ export function ContentEditor() {
       const d = await r.json()
       setUpdatedAt(d.updatedAt)
       setDirty(false)
-      setData(parsed)
-      toast.success(isHi ? 'सामग्री सहेजी गई!' : 'Content saved!')
+      if (mode === 'json') setData(parsed as Record<string, unknown>)
+      toast.success(isHi ? 'सामग्री सहेजी गई! पोर्टल तुरंत अपडेट होगा।' : 'Content saved! Portal updates instantly.')
     } catch (e) {
       toast.error(isHi ? 'सहेजने में विफल' : 'Save failed', { description: (e as Error).message })
     } finally {
@@ -99,9 +220,14 @@ export function ContentEditor() {
   }
 
   const handleReset = () => {
-    if (data) setEditText(JSON.stringify(data, null, 2))
+    if (mode === 'json') {
+      setEditText(JSON.stringify(data, null, 2))
+    }
     setDirty(false)
   }
+
+  const activeSection = SECTIONS.find(s => s.key === activeKey)
+  const hasFields = !!activeSection?.fields
 
   return (
     <div className="space-y-4">
@@ -147,7 +273,7 @@ export function ContentEditor() {
               <div className="flex items-center gap-2">
                 <Edit3 className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-semibold">
-                  {SECTIONS.find(s => s.key === activeKey)?.[isHi ? 'hi' : 'en']}
+                  {activeSection?.[isHi ? 'hi' : 'en']}
                 </h3>
                 <Badge variant="outline" className="text-[9px] font-mono">{activeKey}</Badge>
                 {updatedAt && (
@@ -158,6 +284,25 @@ export function ContentEditor() {
                 )}
               </div>
               <div className="flex items-center gap-1.5">
+                {/* Mode toggle */}
+                {hasFields && (
+                  <div className="inline-flex rounded-lg border border-border overflow-hidden">
+                    <button
+                      onClick={() => setMode('form')}
+                      className={`px-2.5 h-7 text-[10px] inline-flex items-center gap-1 transition-colors ${mode === 'form' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-secondary'}`}
+                    >
+                      <FormInput className="h-3 w-3" />
+                      {isHi ? 'फॉर्म' : 'Form'}
+                    </button>
+                    <button
+                      onClick={() => { setMode('json'); setEditText(JSON.stringify(data, null, 2)) }}
+                      className={`px-2.5 h-7 text-[10px] inline-flex items-center gap-1 transition-colors ${mode === 'json' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-secondary'}`}
+                    >
+                      <Code className="h-3 w-3" />
+                      JSON
+                    </button>
+                  </div>
+                )}
                 {dirty && (
                   <Badge className="text-[9px] bg-amber-500/20 text-amber-700 border-amber-400/40 gap-1">
                     <AlertCircle className="h-2.5 w-2.5" />
@@ -177,7 +322,31 @@ export function ContentEditor() {
 
             {loading ? (
               <Skeleton className="h-96 rounded-lg" />
+            ) : mode === 'form' && hasFields ? (
+              /* Structured form mode */
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {activeSection!.fields!.map(f => {
+                  const val = getPath(data, f.path)
+                  return (
+                    <div key={f.path} className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground flex items-center justify-between">
+                        <span>{isHi ? f.hi : f.en}</span>
+                        <span className="font-mono text-[8px] opacity-50">{f.path}</span>
+                      </Label>
+                      <Input
+                        type={f.type}
+                        value={val === undefined || val === null ? '' : String(val)}
+                        onChange={(e) => handleFieldChange(f.path, e.target.value)}
+                        className="text-sm h-8"
+                        dir={f.type === 'text' ? 'auto' : 'ltr'}
+                      />
+                      {f.unit && <span className="text-[8px] text-muted-foreground">{f.unit}</span>}
+                    </div>
+                  )
+                })}
+              </div>
             ) : (
+              /* JSON mode */
               <textarea
                 value={editText}
                 onChange={(e) => { setEditText(e.target.value); setDirty(true) }}
@@ -189,9 +358,11 @@ export function ContentEditor() {
             <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Check className="h-3 w-3 text-green-600" />
-                {isHi ? 'JSON प्रारूप — संपादित करें और सहेजें। पोर्टल तुरंत अपडेट होगा।' : 'JSON format — edit and save. Portal updates instantly.'}
+                {mode === 'form'
+                  ? (isHi ? 'फॉर्म भरें और सहेजें — पोर्टल तुरंत अपडेट होगा।' : 'Fill form and save — portal updates instantly.')
+                  : (isHi ? 'JSON संपादित करें और सहेजें।' : 'Edit JSON and save.')}
               </span>
-              <span className="font-mono">{editText.length} chars</span>
+              <span className="font-mono">{mode === 'json' ? `${editText.length} chars` : `${activeSection?.fields?.length || 0} fields`}</span>
             </div>
           </CardContent>
         </Card>

@@ -76,6 +76,35 @@ export function AdminPanel() {
 
   useEffect(() => { refreshUser() }, [refreshUser])
 
+  // ── RBAC tab definitions (master doc §5.3) ──
+  const allTabs: { key: TabKey; hi: string; en: string; icon: React.ElementType; roles: string[] }[] = [
+    { key: 'dashboard', hi: 'डैशबोर्ड', en: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'secretary', 'viewer'] },
+    { key: 'profile', hi: 'प्रोफ़ाइल', en: 'Profile', icon: UserCog, roles: ['admin', 'secretary'] },
+    { key: 'images', hi: 'छवियाँ', en: 'Images', icon: ImageIcon, roles: ['admin', 'secretary'] },
+    { key: 'complaints', hi: 'शिकायतें', en: 'Complaints', icon: MessageSquareWarning, roles: ['admin', 'secretary', 'viewer'] },
+    { key: 'feedback', hi: 'नागरिक प्रतिक्रिया', en: 'Feedback', icon: Star, roles: ['admin', 'secretary', 'viewer'] },
+    { key: 'polls', hi: 'सर्वेक्षण', en: 'Polls', icon: Vote, roles: ['admin'] },
+    { key: 'marketplace', hi: 'बाजार', en: 'Market', icon: Store, roles: ['admin'] },
+    { key: 'announcements', hi: 'घोषणाएँ', en: 'Announcements', icon: Bell, roles: ['admin', 'secretary'] },
+    { key: 'blog', hi: 'ब्लॉग', en: 'Blog', icon: Newspaper, roles: ['admin', 'secretary'] },
+    { key: 'content', hi: 'सामग्री', en: 'Content', icon: Database, roles: ['admin'] },
+    { key: 'csv', hi: 'CSV अपलोड', en: 'CSV Upload', icon: FileSpreadsheet, roles: ['admin'] },
+    { key: 'activity', hi: 'गतिविधि लॉग', en: 'Activity Log', icon: ScrollText, roles: ['admin'] },
+  ]
+  const visibleTabs = user ? allTabs.filter(t => t.roles.includes(user.role)) : []
+  const ROLE_LABELS: Record<string, { hi: string; en: string; color: string }> = {
+    admin: { hi: 'सुपर एडमिन', en: 'SuperAdmin', color: 'bg-primary/15 text-primary border-primary/30' },
+    secretary: { hi: 'संपादक', en: 'Editor', color: 'bg-green-600/15 text-green-700 dark:text-green-400 border-green-600/30' },
+    viewer: { hi: 'दर्शक', en: 'Viewer', color: 'bg-muted text-muted-foreground border-border' },
+  }
+
+  // RBAC guard: if current tab is not accessible by user's role, reset to dashboard
+  useEffect(() => {
+    if (user && visibleTabs.length > 0 && !visibleTabs.some(t => t.key === tab)) {
+      setTab('dashboard')
+    }
+  }, [user, visibleTabs, tab])
+
   const handleLogin = async () => {
     setSubmitting(true); setError(null)
     try {
@@ -187,20 +216,9 @@ export function AdminPanel() {
   }
 
   // ── Authenticated layout ─────────────────────────────────────────────────
-  const tabs: { key: TabKey; hi: string; en: string; icon: React.ElementType }[] = [
-    { key: 'dashboard', hi: 'डैशबोर्ड', en: 'Dashboard', icon: LayoutDashboard },
-    { key: 'profile', hi: 'प्रोफ़ाइल', en: 'Profile', icon: UserCog },
-    { key: 'images', hi: 'छवियाँ', en: 'Images', icon: ImageIcon },
-    { key: 'complaints', hi: 'शिकायतें', en: 'Complaints', icon: MessageSquareWarning },
-    { key: 'feedback', hi: 'नागरिक प्रतिक्रिया', en: 'Feedback', icon: Star },
-    { key: 'polls', hi: 'सर्वेक्षण', en: 'Polls', icon: Vote },
-    { key: 'marketplace', hi: 'बाजार', en: 'Market', icon: Store },
-    { key: 'announcements', hi: 'घोषणाएँ', en: 'Announcements', icon: Bell },
-    { key: 'blog', hi: 'ब्लॉग', en: 'Blog', icon: Newspaper },
-    { key: 'content', hi: 'सामग्री', en: 'Content', icon: Database },
-    { key: 'csv', hi: 'CSV अपलोड', en: 'CSV Upload', icon: FileSpreadsheet },
-    { key: 'activity', hi: 'गतिविधि लॉग', en: 'Activity Log', icon: ScrollText },
-  ]
+  // tabs, visibleTabs, and ROLE_LABELS are defined above (before early returns)
+  // to comply with React Hooks rules.
+  const tabs = allTabs // alias for template reference
 
   return (
     <div className="min-h-[70vh]">
@@ -219,7 +237,12 @@ export function AdminPanel() {
                   </h1>
                   <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 truncate">
                     <span className="truncate">{user.name}</span>
-                    <Badge variant="outline" className="text-[9px] uppercase">{user.role}</Badge>
+                    <Badge variant="outline" className={`text-[9px] uppercase ${ROLE_LABELS[user.role]?.color || ''}`}>
+                      {locale === 'hi' ? (ROLE_LABELS[user.role]?.hi || user.role) : (ROLE_LABELS[user.role]?.en || user.role)}
+                    </Badge>
+                    <span className="text-[9px] text-muted-foreground/70 hidden sm:inline">
+                      {visibleTabs.length}/{tabs.length} {locale === 'hi' ? 'टैब' : 'tabs'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -239,9 +262,9 @@ export function AdminPanel() {
               </div>
             </div>
 
-            {/* Tabs nav — horizontally scrollable on small screens */}
+            {/* Tabs nav — horizontally scrollable on small screens, filtered by role */}
             <TabsList className="overflow-x-auto max-w-full w-full justify-start h-auto p-1 mt-3">
-              {tabs.map(t => {
+              {visibleTabs.map(t => {
                 const Icon = t.icon
                 return (
                   <TabsTrigger key={t.key} value={t.key} className="text-xs gap-1.5 flex-shrink-0 admin-tab-hover">

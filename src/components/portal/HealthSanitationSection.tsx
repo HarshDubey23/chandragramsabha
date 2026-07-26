@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { useI18n } from '@/lib/i18n'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -158,17 +159,31 @@ function ImmunizationTooltip({
 export function HealthSanitationSection() {
   const { locale } = useI18n()
   const isHi = locale === 'hi'
+  const [healthData, setHealthData] = useState<{
+    immunization_coverage_pct?: number
+    health_workers?: { anm?: number; asha?: number; anganwadi_workers?: number }
+    sanitation?: { ihhl_built?: number; coverage_pct?: number }
+  } | null>(null)
 
-  // Bar chart data derived from IMMUNIZATION_DATA
-  const immChartData = IMMUNIZATION_DATA.map(d => ({
-    name: isHi ? d.nameHi : d.nameEn,
-    nameHi: d.nameHi,
-    nameEn: d.nameEn,
-    pct: d.pct,
-    covered: d.covered,
-    total: d.total,
-    key: d.key,
-  }))
+  useEffect(() => {
+    fetch('/api/content/health').then(r => r.ok ? r.json() : null).then(d => d?.data && setHealthData(d.data)).catch(() => {})
+  }, [])
+
+  // Dynamic immunization data — scale coverage to content API value if available
+  const immPctOverride = healthData?.immunization_coverage_pct
+  const immChartData = IMMUNIZATION_DATA.map(d => {
+    const pct = immPctOverride ? Math.min(99, Math.round(d.pct * immPctOverride / 94)) : d.pct
+    const covered = immPctOverride ? Math.round(d.total * pct / 100) : d.covered
+    return {
+      name: isHi ? d.nameHi : d.nameEn,
+      nameHi: d.nameHi,
+      nameEn: d.nameEn,
+      pct,
+      covered,
+      total: d.total,
+      key: d.key,
+    }
+  })
 
   return (
     <section
