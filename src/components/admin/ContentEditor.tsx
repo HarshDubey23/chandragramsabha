@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Database, Save, Loader2, Edit3, Check, X, AlertCircle, Code, FormInput } from 'lucide-react'
+import { Database, Save, Loader2, Edit3, Check, X, AlertCircle, Code, FormInput, Plus } from 'lucide-react'
 
 interface SectionMeta {
   key: string
@@ -20,6 +20,8 @@ interface SectionMeta {
   description: string
   // Field definitions for structured form mode
   fields?: FieldDef[]
+  // Array field definitions for list-type data (e.g., contacts, SHG groups)
+  arrayFields?: ArrayFieldDef[]
 }
 
 interface FieldDef {
@@ -28,6 +30,14 @@ interface FieldDef {
   en: string
   type: 'number' | 'text'
   unit?: string
+}
+
+interface ArrayFieldDef {
+  arrayPath: string // e.g. "contacts", "groups"
+  itemHi: string // e.g. "संपर्क", "समूह"
+  itemEn: string // e.g. "Contact", "Group"
+  // Fields within each array item
+  itemFields: { key: string; hi: string; en: string; type: 'number' | 'text' }[]
 }
 
 const SECTIONS: SectionMeta[] = [
@@ -104,8 +114,35 @@ const SECTIONS: SectionMeta[] = [
       { path: 'pension.divyang', hi: 'दिव्यांग पेंशन', en: 'Divyang Pension', type: 'number' },
     ],
   },
-  { key: 'shg_directory', hi: 'स्व-सहायता समूह', en: 'SHG Directory', icon: 'users', description: 'Self-help groups, members, savings' },
-  { key: 'emergency_contacts', hi: 'आपातकालीन संपर्क', en: 'Emergency Contacts', icon: 'phone', description: 'Police, ambulance, PHC, utilities' },
+  { key: 'shg_directory', hi: 'स्व-सहायता समूह', en: 'SHG Directory', icon: 'users', description: 'Self-help groups, members, savings',
+    arrayFields: [
+      {
+        arrayPath: 'groups', itemHi: 'समूह', itemEn: 'Group',
+        itemFields: [
+          { key: 'name', hi: 'नाम', en: 'Name', type: 'text' },
+          { key: 'name_en', hi: 'नाम (अंग्रेज़ी)', en: 'Name (English)', type: 'text' },
+          { key: 'members', hi: 'सदस्य', en: 'Members', type: 'number' },
+          { key: 'ward', hi: 'वार्ड', en: 'Ward', type: 'number' },
+          { key: 'activity', hi: 'गतिविधि', en: 'Activity', type: 'text' },
+          { key: 'savings', hi: 'बचत (₹)', en: 'Savings (₹)', type: 'number' },
+        ],
+      },
+    ],
+  },
+  { key: 'emergency_contacts', hi: 'आपातकालीन संपर्क', en: 'Emergency Contacts', icon: 'phone', description: 'Police, ambulance, PHC, utilities',
+    arrayFields: [
+      {
+        arrayPath: 'contacts', itemHi: 'संपर्क', itemEn: 'Contact',
+        itemFields: [
+          { key: 'name_hi', hi: 'नाम (हिंदी)', en: 'Name (Hindi)', type: 'text' },
+          { key: 'name_en', hi: 'नाम (अंग्रेज़ी)', en: 'Name (English)', type: 'text' },
+          { key: 'phone', hi: 'फ़ोन', en: 'Phone', type: 'text' },
+          { key: 'category', hi: 'श्रेणी', en: 'Category', type: 'text' },
+          { key: 'available', hi: 'उपलब्ध', en: 'Available', type: 'text' },
+        ],
+      },
+    ],
+  },
 ]
 
 // Get value at dot-notation path
@@ -187,6 +224,29 @@ export function ContentEditor() {
     const numVal = val === '' ? 0 : Number(val)
     const newData = setPath(data, path, isNaN(numVal) ? val : numVal)
     setData(newData)
+    setDirty(true)
+  }
+
+  // ── Array item manipulation ──
+  const handleArrayItemChange = (arrayPath: string, index: number, itemKey: string, val: string) => {
+    const arr = (getPath(data, arrayPath) as Record<string, unknown>[]) || []
+    const numVal = val === '' ? 0 : Number(val)
+    const newArr = arr.map((item, i) => i === index ? { ...item, [itemKey]: isNaN(numVal) || itemKey === 'phone' ? val : numVal } : item)
+    setData(setPath(data, arrayPath, newArr))
+    setDirty(true)
+  }
+
+  const handleAddArrayItem = (arrayPath: string, itemFields: { key: string }[]) => {
+    const arr = (getPath(data, arrayPath) as Record<string, unknown>[]) || []
+    const newItem: Record<string, unknown> = {}
+    for (const f of itemFields) newItem[f.key] = f.key === 'members' || f.key === 'ward' || f.key === 'savings' ? 0 : ''
+    setData(setPath(data, arrayPath, [...arr, newItem]))
+    setDirty(true)
+  }
+
+  const handleDeleteArrayItem = (arrayPath: string, index: number) => {
+    const arr = (getPath(data, arrayPath) as Record<string, unknown>[]) || []
+    setData(setPath(data, arrayPath, arr.filter((_, i) => i !== index)))
     setDirty(true)
   }
 
@@ -285,7 +345,7 @@ export function ContentEditor() {
               </div>
               <div className="flex items-center gap-1.5">
                 {/* Mode toggle */}
-                {hasFields && (
+                {(hasFields || activeSection?.arrayFields) && (
                   <div className="inline-flex rounded-lg border border-border overflow-hidden">
                     <button
                       onClick={() => setMode('form')}
@@ -322,25 +382,93 @@ export function ContentEditor() {
 
             {loading ? (
               <Skeleton className="h-96 rounded-lg" />
-            ) : mode === 'form' && hasFields ? (
-              /* Structured form mode */
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {activeSection!.fields!.map(f => {
-                  const val = getPath(data, f.path)
+            ) : mode === 'form' && (hasFields || activeSection?.arrayFields) ? (
+              /* Structured form mode — fields + arrays */
+              <div className="space-y-4">
+                {/* Scalar fields */}
+                {hasFields && (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {activeSection!.fields!.map(f => {
+                      const val = getPath(data, f.path)
+                      return (
+                        <div key={f.path} className="space-y-1">
+                          <Label className="text-[10px] text-muted-foreground flex items-center justify-between">
+                            <span>{isHi ? f.hi : f.en}</span>
+                            <span className="font-mono text-[8px] opacity-50">{f.path}</span>
+                          </Label>
+                          <Input
+                            type={f.type}
+                            value={val === undefined || val === null ? '' : String(val)}
+                            onChange={(e) => handleFieldChange(f.path, e.target.value)}
+                            className="text-sm h-8"
+                            dir={f.type === 'text' ? 'auto' : 'ltr'}
+                          />
+                          {f.unit && <span className="text-[8px] text-muted-foreground">{f.unit}</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Array fields — list editor with add/delete */}
+                {activeSection?.arrayFields?.map(af => {
+                  const arr = (getPath(data, af.arrayPath) as Record<string, unknown>[]) || []
                   return (
-                    <div key={f.path} className="space-y-1">
-                      <Label className="text-[10px] text-muted-foreground flex items-center justify-between">
-                        <span>{isHi ? f.hi : f.en}</span>
-                        <span className="font-mono text-[8px] opacity-50">{f.path}</span>
-                      </Label>
-                      <Input
-                        type={f.type}
-                        value={val === undefined || val === null ? '' : String(val)}
-                        onChange={(e) => handleFieldChange(f.path, e.target.value)}
-                        className="text-sm h-8"
-                        dir={f.type === 'text' ? 'auto' : 'ltr'}
-                      />
-                      {f.unit && <span className="text-[8px] text-muted-foreground">{f.unit}</span>}
+                    <div key={af.arrayPath} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-semibold flex items-center gap-1.5">
+                          <Database className="h-3 w-3 text-primary" />
+                          {isHi ? `${af.itemHi} सूची (${arr.length})` : `${af.itemEn} List (${arr.length})`}
+                          <span className="font-mono text-[8px] opacity-50">{af.arrayPath}</span>
+                        </Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[10px] gap-1 border-primary/30 hover:border-primary/50"
+                          onClick={() => handleAddArrayItem(af.arrayPath, af.itemFields)}
+                        >
+                          <Plus className="h-3 w-3" />
+                          {isHi ? `${af.itemHi} जोड़ें` : `Add ${af.itemEn}`}
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {arr.length === 0 && (
+                          <div className="p-4 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                            {isHi ? `कोई ${af.itemHi} नहीं। "${af.itemHi} जोड़ें" बटन से जोड़ें।` : `No ${af.itemEn.toLowerCase()}s. Click "Add ${af.itemEn}" to add.`}
+                          </div>
+                        )}
+                        {arr.map((item, idx) => (
+                          <div key={idx} className="p-3 rounded-lg border border-border bg-secondary/20 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-medium text-muted-foreground">
+                                {isHi ? `${af.itemHi} ${idx + 1}` : `${af.itemEn} ${idx + 1}`}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                onClick={() => handleDeleteArrayItem(af.arrayPath, idx)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {af.itemFields.map(f => (
+                                <div key={f.key} className="space-y-0.5">
+                                  <Label className="text-[9px] text-muted-foreground">{isHi ? f.hi : f.en}</Label>
+                                  <Input
+                                    type={f.type}
+                                    value={item[f.key] === undefined || item[f.key] === null ? '' : String(item[f.key])}
+                                    onChange={(e) => handleArrayItemChange(af.arrayPath, idx, f.key, e.target.value)}
+                                    className="text-xs h-7"
+                                    dir={f.type === 'text' ? 'auto' : 'ltr'}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )
                 })}

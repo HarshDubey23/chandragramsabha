@@ -362,3 +362,54 @@ Task: WebP image migration, complete API RBAC, PWA install prompt + offline cach
 3. Replace execCommand blog editor with TipTap for robustness.
 4. Add PWA offline page (cached fallback HTML when fully offline).
 5. Performance: add lazy loading + blur-up placeholder for gallery images.
+
+---
+Task ID: 17
+Agent: webDevReview cron (round 7)
+Task: Delete original JPGs, structured array form editors, fix 404s
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos (WebP) + 3 videos, admin panel with 13 tabs (full RBAC), dynamic content system, citizen complaint form, blog/CMS, global search, marketplace, PWA install prompt. Production-stable.
+
+## Work Completed This Round
+
+### Cleanup: Deleted Original JPGs + AI Gallery
+- Deleted 88 original WhatsApp JPGs from `/public/whatsapp/` (49MB reclaimed) — only MP4 videos + thumbnails remain.
+- Deleted `/public/gallery/` directory (12 AI-generated images, 2.4MB) — NO AI images anywhere.
+- Updated SiteSettings `photo_url` fields in DB for pradhan + secretary from `/whatsapp/*.jpg` to `/whatsapp-optimized/*.webp`.
+- Fixed all 404 errors for old JPG paths — verified 0 broken images, 0 404s.
+- Total disk savings: ~51MB (49MB JPGs + 2.4MB AI gallery).
+
+### Structured Array Form Editor (master doc §4.3 — complete)
+- Added `ArrayFieldDef` interface and `arrayFields` property to `SectionMeta` in ContentEditor.
+- Defined array field schemas for 2 remaining sections:
+  - **SHG Directory**: `groups` array with fields (name, name_en, members, ward, activity, savings).
+  - **Emergency Contacts**: `contacts` array with fields (name_hi, name_en, phone, category, available).
+- Added array manipulation handlers: `handleArrayItemChange`, `handleAddArrayItem`, `handleDeleteArrayItem`.
+- Added array list editor UI in form mode: each array item renders as a card with labeled inputs, delete button per item, "Add" button at top, item count display, empty state message.
+- All 7 content sections now have structured form editors — admin never needs to write JSON.
+
+### Bug Fix: SiteSettings Photo URLs
+- The pradhan and secretary SiteSettings records in DB still had old `/whatsapp/IMG-*.jpg` paths, causing 404 errors.
+- Updated both records to use `/whatsapp-optimized/IMG-*.webp` paths.
+- Verified: 0 broken images, 0 404 errors after fix.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings.
+- **200 images** loading (0 broken, 0 404s) — all WebP optimized.
+- Content API: emergency_contacts returns 8 contacts, shg_directory returns 4 groups.
+- ContentEditor: all 7 sections have structured form editors (5 scalar + 2 array-type).
+- Disk usage: `/public/whatsapp/` = 29MB (videos only), `/public/whatsapp-optimized/` = 16MB (WebP images).
+
+## Unresolved Issues / Risks
+- PhotoGallery blur-up lazy loading placeholders still pending (performance enhancement).
+- BlogManager still uses execCommand (deprecated but functional) — TipTap upgrade is future work.
+- Agent-browser tab clicking has React state sync issue with Radix UI Tabs — testing limitation only, real users can click normally.
+
+## Priority Recommendations for Next Phase
+1. PhotoGallery blur-up lazy loading placeholders for perceived performance.
+2. Replace execCommand blog editor with TipTap for robustness.
+3. PWA offline fallback page (cached HTML when fully offline).
+4. Admin activity log export (CSV/PDF) for audit compliance.
+5. Citizen feedback rating distribution chart in admin dashboard.
