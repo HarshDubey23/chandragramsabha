@@ -279,6 +279,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<Complaint[] | null>(null)
   const [feedbackStats, setFeedbackStats] = useState<{ total: number; average: number; distribution: { rating: number; count: number }[] } | null>(null)
+  const [complaintTrend, setComplaintTrend] = useState<{ month: string; monthHi: string; total: number; resolved: number; pending: number; resolutionRate: number }[] | null>(null)
   const [loading, setLoading] = useState(true)
 
   // System status checks
@@ -291,12 +292,14 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
       fetch('/api/stats').then(r => r.json()),
       fetch('/api/complaints/list').then(r => r.json()),
       fetch('/api/feedback/stats').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/complaints/stats').then(r => r.ok ? r.json() : null).catch(() => null),
     ])
-      .then(([s, c, f]) => {
+      .then(([s, c, f, ct]) => {
         if (!alive) return
         setStats(s)
         setRecent((c.complaints || []).slice(0, 5))
         if (f) setFeedbackStats(f)
+        if (ct?.trend) setComplaintTrend(ct.trend)
       })
       .catch(() => {
         if (!alive) return
@@ -691,6 +694,66 @@ export function Dashboard({ onNavigate }: { onNavigate?: (tab: TabKey) => void }
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Complaint Trend (6 months) ─────────────────────────────────────── */}
+      {complaintTrend && complaintTrend.some(m => m.total > 0) && (
+        <Card className="border-bottom-glow">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base section-heading flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              {locale === 'hi' ? 'शिकायत प्रवृत्ति (6 माह)' : 'Complaint Trend (6 months)'}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              {locale === 'hi' ? 'मासिक शिकायतें एवं समाधान दर।' : 'Monthly complaints and resolution rate.'}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={complaintTrend.map(m => ({ name: locale === 'hi' ? m.monthHi : m.month, ...m }))}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <Tooltip
+                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}
+                  formatter={(val: number, name: string) => {
+                    if (name === 'total') return [val, locale === 'hi' ? 'कुल' : 'Total']
+                    if (name === 'resolved') return [val, locale === 'hi' ? 'हल' : 'Resolved']
+                    if (name === 'resolutionRate') return [`${val}%`, locale === 'hi' ? 'समाधान दर' : 'Resolution Rate']
+                    return [val, name]
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '11px' }} formatter={(v) => v === 'total' ? (locale === 'hi' ? 'कुल' : 'Total') : v === 'resolved' ? (locale === 'hi' ? 'हल' : 'Resolved') : v === 'resolutionRate' ? (locale === 'hi' ? 'समाधान दर %' : 'Resolution %') : v} />
+                <Line type="monotone" dataKey="total" stroke="oklch(0.62 0.18 55)" strokeWidth={2.5} dot={{ r: 4, fill: 'oklch(0.62 0.18 55)' }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="resolved" stroke="oklch(0.60 0.14 145)" strokeWidth={2.5} dot={{ r: 4, fill: 'oklch(0.60 0.14 145)' }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="resolutionRate" stroke="oklch(0.55 0.16 35)" strokeWidth={2} strokeDasharray="5 5" dot={false} yAxisId={0} />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="flex items-center justify-between mt-3 grid grid-cols-3 gap-2 text-center">
+              {(() => {
+                const total6 = complaintTrend.reduce((a, m) => a + m.total, 0)
+                const resolved6 = complaintTrend.reduce((a, m) => a + m.resolved, 0)
+                const avgRate = total6 > 0 ? Math.round((resolved6 / total6) * 100) : 0
+                return (
+                  <>
+                    <div className="p-2 rounded-lg bg-secondary/40">
+                      <div className="text-lg font-bold text-primary">{total6}</div>
+                      <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? '6 माह कुल' : '6mo Total'}</div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-green-600/5">
+                      <div className="text-lg font-bold text-green-700 dark:text-green-400">{resolved6}</div>
+                      <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'हल' : 'Resolved'}</div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-amber-500/5">
+                      <div className="text-lg font-bold text-amber-600">{avgRate}%</div>
+                      <div className="text-[9px] text-muted-foreground">{locale === 'hi' ? 'औसत दर' : 'Avg Rate'}</div>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Panchayat Performance Comparison ───────────────────────────────── */}
       {stats.performanceData && stats.performanceData.length > 0 && (

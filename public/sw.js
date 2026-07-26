@@ -6,11 +6,12 @@
 //   - Network-first for /api/* (always try fresh, fall back to cache when offline)
 //   - Bypass for non-GET and cross-origin requests
 
-const SW_VERSION = 'gpchandra-sw-v2';
+const SW_VERSION = 'gpchandra-sw-v3';
 const APP_SHELL = [
   '/',
   '/manifest.json',
   '/logo.svg',
+  '/offline.html',
 ];
 
 // Image cache — separate cache for WhatsApp images (larger, cache-first)
@@ -72,7 +73,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else — stale-while-revalidate
+  // Everything else — stale-while-revalidate, with offline fallback for navigation requests
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req)
@@ -84,7 +85,13 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => cached);
+        .catch(() => {
+          // Navigation requests (HTML pages) — fall back to offline page
+          if (req.mode === 'navigate') {
+            return caches.match('/offline.html');
+          }
+          return cached;
+        });
       return cached || fetchPromise;
     })
   );

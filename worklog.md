@@ -464,3 +464,54 @@ Task: PhotoGallery blur-up, activity log CSV export, feedback rating chart
 3. Add more interactive data visualizations (complaint trend over time, scheme enrollment growth).
 4. Add citizen notification system (email/SMS when complaint status changes).
 5. Add multi-ward comparative analytics dashboard.
+
+---
+Task ID: 19
+Agent: webDevReview cron (round 9)
+Task: Complaint trend chart, PWA offline fallback page
+
+## Current Project Status
+- 32 sections, 88 real WhatsApp photos (WebP) + 3 videos, admin panel with 13 tabs (full RBAC), dynamic content system with 7 structured form editors, citizen complaint form, blog/CMS, global search, marketplace, PWA install prompt, blur-up lazy loading, activity log CSV export, feedback rating chart. Production-stable.
+
+## Work Completed This Round
+
+### Complaint Trend Chart (admin dashboard)
+- Created `/api/complaints/stats` endpoint: returns last 6 months of complaint data (month label, total, resolved, pending, resolution rate) using Prisma count queries with date ranges. Viewer+ role required.
+- Added complaint trend LineChart to admin Dashboard: 3 lines (total complaints in saffron, resolved in green, resolution rate as dashed terracotta line). Recharts LineChart with custom tooltip, legend, bilingual month labels.
+- Added summary stats grid below chart: 6-month total, resolved count, average resolution rate — color-coded cards.
+- Fetches in parallel with other dashboard data.
+- Verified: API returns correct trend (Jul 26: 4 total, 1 resolved, 25% rate).
+
+### PWA Offline Fallback Page
+- Created `/public/offline.html`: beautiful bilingual offline page with:
+  - Saffron gradient logo, tricolor top bar, offline icon
+  - "आप अभी ऑफ़लाइन हैं" message in Hindi + English
+  - Reconnect button (triggers page reload)
+  - Info grid with panchayat contact (phone, code, address, emergency numbers)
+  - Auto-reload when connection restored (online event listener)
+  - Responsive design, saffron/cream theme matching the portal
+- Updated service worker (v3):
+  - Added `/offline.html` to APP_SHELL precache list.
+  - Navigation requests (HTML pages) now fall back to offline page when network fails.
+  - Other assets (JS/CSS) still use stale-while-revalidate.
+- Impact: when citizens lose internet connection, they see a helpful offline page with contact info instead of a browser error — critical for rural mobile users.
+
+## Verification Results
+- `bun run lint` passes clean (exit 0).
+- Page loads HTTP 200, 32 sections, 0 console errors, 0 console warnings, 0 404s.
+- 200 images loading (0 broken) — all WebP with blur-up placeholder.
+- Complaints stats API: returns correct 6-month trend data (HTTP 200).
+- Offline page: serves HTTP 200 at /offline.html with proper HTML.
+- Service worker v3: precaches offline.html, serves as navigation fallback.
+
+## Unresolved Issues / Risks
+- BlogManager still uses execCommand (deprecated but functional) — TipTap upgrade is future work.
+- Scheme enrollment time-series chart still pending (would need historical data tracking).
+- Agent-browser timeout on deep navigation — testing limitation only.
+
+## Priority Recommendations for Next Phase
+1. Replace execCommand blog editor with TipTap for robustness.
+2. Add scheme enrollment historical tracking + growth chart.
+3. Add citizen notification system (email/SMS when complaint status changes).
+4. Add multi-ward comparative analytics dashboard.
+5. Add WhatsApp Business API integration for real notifications.
