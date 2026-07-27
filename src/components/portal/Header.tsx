@@ -15,8 +15,9 @@ import {
   SheetTitle,
   SheetHeader,
 } from '@/components/ui/sheet'
-import { Menu, Shield, Phone, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store, Video, Search } from 'lucide-react'
+import { Menu, Shield, Phone, Mic, Home, Building2, Droplets, Image, MessageSquare, BookOpen, Globe, Users, CloudSun, HelpCircle, IndianRupee, Landmark, Scale, GraduationCap, HeartPulse, Calendar, ChevronDown, MoreHorizontal, Flag, ClipboardCheck, FileCheck, Store, Video, Search } from 'lucide-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { startVapiCall } from '@/lib/vapi'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -199,10 +200,10 @@ export function Header() {
               variant="outline"
               size="sm"
               className="hidden md:flex gap-1.5 h-9 text-xs shadow-sm hover:shadow-md border-primary/30 hover:border-primary/50 transition-all"
-              onClick={() => window.open('tel:+919651035021')}
+              onClick={() => startVapiCall()}
             >
-              <Phone className="h-3.5 w-3.5 text-primary" />
-              <span className="font-mono">{locale === 'hi' ? '96510 35021' : '+91 96510 35021'}</span>
+              <Mic className="h-3.5 w-3.5 text-primary" />
+              <span>{locale === 'hi' ? 'AI सहायक' : 'AI Assistant'}</span>
             </Button>
             <LanguageSwitcher />
             <DarkModeToggle />
@@ -294,10 +295,10 @@ export function Header() {
                   <Button
                     variant="ghost"
                     className="justify-start gap-3 h-11"
-                    onClick={() => window.open('tel:+919651035021')}
+                    onClick={() => { startVapiCall(); setMobileOpen(false) }}
                   >
-                    <Phone className="h-4 w-4" />
-                    <span className="font-mono text-xs">+91 96510 35021</span>
+                    <Mic className="h-4 w-4" />
+                    <span>{locale === 'hi' ? 'AI सहायक से बात करें' : 'Talk to AI'}</span>
                   </Button>
                 </div>
               </SheetContent>

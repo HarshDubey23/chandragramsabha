@@ -7,6 +7,7 @@ import { ComplaintTracking } from '@/components/portal/ComplaintTracking'
 import { AdminPanel } from '@/components/admin/AdminPanel'
 import { ScrollProgress } from '@/components/portal/ScrollProgress'
 import { BackToTop } from '@/components/portal/BackToTop'
+import { AIVoiceButton } from '@/components/portal/AIVoiceButton'
 import { ServiceWorkerRegister } from '@/components/portal/ServiceWorkerRegister'
 import { InstallPrompt } from '@/components/portal/InstallPrompt'
 import { useUI } from '@/lib/ui-store'
@@ -35,6 +36,7 @@ export default function Home() {
       </main>
       <Footer />
       <BackToTop />
+      {view !== 'admin' && <AIVoiceButton />}
       <ServiceWorkerRegister />
       <InstallPrompt />
     </div>

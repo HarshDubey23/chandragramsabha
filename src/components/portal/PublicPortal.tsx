@@ -41,7 +41,7 @@ export function PublicPortal() {
         <p style={{ fontSize: '9pt', marginTop: '4px' }}>
           पंचायत कोड 3145021064 • विकास खण्ड शंकरगढ़ • जनपद प्रयागराज • उत्तर प्रदेश
         </p>
-        <p style={{ fontSize: '9pt' }}>
+        <p style={{ fontSize: '9pt' }} suppressHydrationWarning>
           निर्गत तिथि / Generated: {new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}
         </p>
       </div>

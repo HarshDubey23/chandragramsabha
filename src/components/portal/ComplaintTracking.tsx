@@ -12,6 +12,7 @@ import { CitizenFeedback } from './CitizenFeedback'
 import { NotificationSubscription } from './NotificationSubscription'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { startVapiCall } from '@/lib/vapi'
 
 interface ComplaintResponse {
   trackingId: string
@@ -430,11 +431,9 @@ export function ComplaintTracking() {
                       : 'Pradhan unavailable? File a complaint with the AI voice assistant.'}
                   </p>
                 </div>
-                <Button asChild className="gap-1.5">
-                  <a href="tel:+919651035021">
-                    <Phone className="h-4 w-4" />
-                    {locale === 'hi' ? 'कॉल करें' : 'Call'}
-                  </a>
+                <Button className="gap-1.5" onClick={() => startVapiCall()}>
+                  <Phone className="h-4 w-4" />
+                  {locale === 'hi' ? 'AI से बात करें' : 'Talk to AI'}
                 </Button>
               </CardContent>
             </Card>

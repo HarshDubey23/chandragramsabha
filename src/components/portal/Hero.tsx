@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ShieldCheck, Phone, MapPin, FileSearch, Mic, ArrowRight, Database, Lock, Sun, Users, Landmark, Home, GraduationCap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { startVapiCall } from '@/lib/vapi'
 
 // Real WhatsApp photographs of Gram Panchayat Chandra — used as the hero
 // background rotator. NO AI-generated images. Each is an authentic panchayat
@@ -203,16 +204,13 @@ export function Hero() {
                   </div>
                 </div>
                 <Button
-                  asChild
                   size="sm"
                   variant="outline"
                   className="gap-1.5 shrink-0 shadow-sm bg-white/90 border-white/40"
+                  onClick={() => startVapiCall()}
                 >
-                  <a href="tel:+919651035021" className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-green-500 pulse-glow shrink-0" aria-hidden="true" />
-                    <Phone className="h-3.5 w-3.5" />
-                    {locale === 'hi' ? 'कॉल करें' : 'Call'}
-                  </a>
+                  <Mic className="h-3.5 w-3.5" />
+                  {locale === 'hi' ? 'AI से बात करें' : 'Talk to AI'}
                 </Button>
               </CardContent>
             </Card>

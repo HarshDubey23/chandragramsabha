@@ -26,20 +26,26 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { appendFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { PrismaClient } from '/home/z/my-project/node_modules/@prisma/client'
+import { fileURLToPath } from 'node:url'
+// Shared Prisma client — standard resolution walks up parent dirs and finds
+// the main workspace node_modules (works both in the sandbox and locally).
+import { PrismaClient } from '@prisma/client'
 
 // ─── Hardcoded port per spec ──────────────────────────────────────────────
 const PORT = 3003
 
 // ─── Resolve paths ─────────────────────────────────────────────────────────
-const SERVICE_DIR = dirname(new URL(import.meta.url).pathname)
+// fileURLToPath handles Windows drive letters and %20-escapes correctly
+// (raw URL.pathname produced 'C:\C:\...%20...' junk paths on Windows).
+const SERVICE_DIR = dirname(fileURLToPath(import.meta.url))
 const OUTBOX_LOG = resolve(SERVICE_DIR, 'whatsapp-outbox.log')
 
 // ─── Env (with safe fallbacks for dev) ─────────────────────────────────────
 // Bun loads .env automatically, but we explicitly default DATABASE_URL so the
 // service works even if no .env file is present.
 process.env.DATABASE_URL =
-  process.env.DATABASE_URL || 'file:/home/z/my-project/db/custom.db'
+  process.env.DATABASE_URL ||
+  'file:' + resolve(SERVICE_DIR, '../../db/custom.db').replace(/\\/g, '/')
 
 const VAPI_SECRET = process.env.VAPI_SECRET || ''
 const VAPI_IP_ALLOWLIST_RAW = process.env.VAPI_IP_ALLOWLIST || ''
@@ -105,21 +111,65 @@ function normalizeCategory(val: unknown): string {
   return ALLOWED_CATEGORIES.has(c) ? c : 'other'
 }
 
-/** Append a WhatsApp mock message to console + outbox log file. */
-function mockWhatsAppDispatch(msg: string): void {
+/** Append a WhatsApp message to console + outbox log file (audit trail). */
+function logWhatsAppToOutbox(msg: string, tag: string): void {
   const stamp = new Date().toISOString()
-  const block = `\n[${stamp}]\n${msg}\n---\n`
-  // 1) console
-  console.log('[vapi-webhook] WhatsApp outbox (mock dispatch):')
+  const block = `\n[${stamp}] [${tag}]\n${msg}\n---\n`
+  console.log(`[vapi-webhook] WhatsApp (${tag}):`)
   console.log(msg)
   console.log('---')
-  // 2) append to log file
   try {
     mkdirSync(SERVICE_DIR, { recursive: true })
     appendFileSync(OUTBOX_LOG, block, 'utf8')
   } catch (e) {
     console.error(`[vapi-webhook] failed to append outbox log:`, e)
   }
+}
+
+/**
+ * Send a real WhatsApp message via the Meta WhatsApp Business Cloud API.
+ * Returns true on success, false on any failure (caller falls back to log).
+ * Requires env: WHATSAPP_TOKEN, WHATSAPP_PHONE_ID, ADMIN_WHATSAPP.
+ */
+async function sendWhatsAppCloudApi(msg: string): Promise<boolean> {
+  const token = process.env.WHATSAPP_TOKEN || ''
+  const phoneId = process.env.WHATSAPP_PHONE_ID || ''
+  const to = (process.env.ADMIN_WHATSAPP || '').replace(/[^\d]/g, '')
+  if (!token || !phoneId || !to) {
+    console.warn('[vapi-webhook] WhatsApp env incomplete (WHATSAPP_TOKEN / WHATSAPP_PHONE_ID / ADMIN_WHATSAPP) — using mock dispatch')
+    return false
+  }
+  try {
+    const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'text',
+        text: { preview_url: false, body: msg },
+      }),
+    })
+    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    if (!res.ok) {
+      console.error(`[vapi-webhook] WhatsApp API error ${res.status}:`, JSON.stringify(data))
+      return false
+    }
+    console.log('[vapi-webhook] WhatsApp sent OK:', JSON.stringify(data))
+    return true
+  } catch (e) {
+    console.error('[vapi-webhook] WhatsApp API request failed:', e)
+    return false
+  }
+}
+
+/** Dispatch the admin alert: real API when configured, always keep audit log. */
+async function dispatchWhatsApp(msg: string): Promise<void> {
+  const sent = await sendWhatsAppCloudApi(msg)
+  logWhatsAppToOutbox(msg, sent ? 'sent' : 'mock')
 }
 
 // ─── JSON helpers (manual, so we keep the RAW body for HMAC) ──────────────
@@ -181,8 +231,18 @@ async function handleWebhook(req: Request, server: any): Promise<Response> {
     return json({ ok: false, error: 'Invalid JSON body' }, 400)
   }
 
-  // Vapi structure: { message: { call: { id, customer: { number }, transcript, analysis: { structuredData } } } }
-  const call = payload?.message?.call
+  // Vapi sends many server-message types (status-update, transcript,
+  // end-of-call-report...). Only the end-of-call report carries the full
+  // transcript + structured analysis, so ignore everything else.
+  const msgType = str(payload?.message?.type)
+  if (msgType && msgType !== 'end-of-call-report') {
+    return json({ ok: true, ignored: msgType })
+  }
+
+  // Tolerate both documented mock shape (fields on message.call) and the
+  // real Vapi end-of-call-report shape (fields on message itself).
+  const message = payload?.message ?? {}
+  const call = message?.call
   if (!call || typeof call !== 'object' || !call.id) {
     console.warn('[vapi-webhook] 400 missing message.call.id in payload')
     return json({ ok: false, error: 'Missing message.call.id' }, 400)
@@ -190,11 +250,12 @@ async function handleWebhook(req: Request, server: any): Promise<Response> {
 
   const vapiCallId = str(call.id)
   const callerPhone = str(call?.customer?.number)
-  const transcript = str(call?.transcript)
-  const structured = (call?.analysis?.structuredData || {}) as Record<string, unknown>
-  const callerName = str(structured.caller_name, 'अनाम')
-  const callReason = str(structured.call_reason, transcript)
-  const category = normalizeCategory(structured.category)
+  const transcript = str(call?.transcript) || str(message?.transcript) || str(message?.artifact?.transcript)
+  const structured = ((call?.analysis?.structuredData || message?.analysis?.structuredData || {}) as Record<string, unknown>)
+  function pick(...keys: string[]): string { for (const k of keys) { const v = structured[k]; if (v) return str(v) } return '' }
+  const callerName = pick('caller_name', 'callerName', 'caller_name') || 'अनाम'
+  const callReason = pick('call_reason', 'complaintReason', 'callReason') || transcript
+  const category = normalizeCategory(pick('category'))
 
   if (!callReason) {
     return json({ ok: false, error: 'Missing call_reason / transcript' }, 400)
@@ -251,7 +312,7 @@ async function handleWebhook(req: Request, server: any): Promise<Response> {
     return json({ ok: false, error: 'Failed to insert complaint' }, 500)
   }
 
-  // ─── 9. Mock WhatsApp dispatch (console + outbox log) ──────────────────
+  // ─── 9. WhatsApp dispatch (real Meta API when configured, else mock) ───
   const waMsg = [
     '🔔 नई शिकायत दर्ज!',
     `नाम: ${callerName}`,
@@ -260,7 +321,7 @@ async function handleWebhook(req: Request, server: any): Promise<Response> {
     `ट्रैकिंग आईडी: ${trackingId}`,
     `शिकायत: ${callReason}`,
   ].join('\n')
-  mockWhatsAppDispatch(waMsg)
+  await dispatchWhatsApp(waMsg)
 
   // ─── 10. Return success ────────────────────────────────────────────────
   console.log(

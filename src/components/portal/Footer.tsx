@@ -1,8 +1,9 @@
 'use client'
 import { useI18n } from '@/lib/i18n'
 import { useUI } from '@/lib/ui-store'
-import { ShieldCheck, Lock, MapPin, Phone, Mail, ExternalLink, FileText, Database, Heart, Sun } from 'lucide-react'
+import { ShieldCheck, Lock, MapPin, Phone, Mic, Mail, ExternalLink, FileText, Database, Heart, Sun } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { startVapiCall } from '@/lib/vapi'
 
 export function Footer() {
   const { locale } = useI18n()
@@ -102,8 +103,10 @@ export function Footer() {
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 shrink-0 text-primary" />
-                <a href="tel:+919651035021" className="font-mono hover:text-primary">+91 96510 35021</a>
+                <Mic className="h-3.5 w-3.5 shrink-0 text-primary" />
+                <button type="button" onClick={() => startVapiCall()} className="hover:text-primary text-sm underline underline-offset-2 cursor-pointer">
+                  {locale === 'hi' ? 'AI सहायक से बात करें' : 'Talk to AI Assistant'}
+                </button>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 shrink-0 text-primary" />
